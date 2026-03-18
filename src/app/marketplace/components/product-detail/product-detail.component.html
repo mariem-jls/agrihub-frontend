@@ -1,0 +1,166 @@
+<nav class="navbar">
+  <div class="navbar-brand">🌿 AgriHub</div>
+  <div class="navbar-right">
+    <button class="back-btn" (click)="goBack()">← Back to Shop</button>
+    <button class="cart-btn" (click)="goToCheckout()"
+            *ngIf="cart.length > 0">
+      🛒 Checkout ({{ cart.length }})
+    </button>
+  </div>
+</nav>
+
+<div class="detail-container" *ngIf="!loading && product">
+
+  <!-- ALERT -->
+  <div *ngIf="message" [class]="'alert alert-' + messageType">
+    {{ message }}
+  </div>
+
+  <!-- PRODUCT SECTION -->
+  <div class="product-section">
+
+<!-- IMAGE -->
+<div class="product-image">
+
+  <!-- Image principale si existe -->
+  <img
+    *ngIf="product.images && product.images.length > 0"
+    [src]="'http://localhost:8080/AgriLink' + getPrimaryImage()"
+    [alt]="product.name"
+    style="width:100%; height:100%; object-fit:cover; border-radius:16px;"
+  />
+
+  <!-- Fallback emoji -->
+  <span
+    *ngIf="!product.images || product.images.length === 0"
+    class="product-emoji">
+    {{ product.isBio ? '🌿' : '🥬' }}
+  </span>
+
+  <span class="bio-badge" *ngIf="product.isBio">🌿 Bio</span>
+  <span class="cert-badge" *ngIf="product.isCertified">✅ Certified</span>
+
+</div>
+
+<!-- Thumbnails si plusieurs images -->
+<div class="thumbnails"
+     *ngIf="product.images && product.images.length > 1">
+  <div
+    *ngFor="let img of product.images"
+    class="thumbnail"
+    [class.active]="selectedImageUrl === img.imageUrl"
+    (click)="selectedImageUrl = img.imageUrl">
+    <img [src]="'http://localhost:8080/AgriLink' + img.imageUrl"
+         [alt]="product.name"/>
+  </div>
+</div>
+
+    <!-- INFO -->
+    <div class="product-info">
+
+      <div class="product-category">{{ product.category?.name }}</div>
+      <h1 class="product-name">{{ product.name }}</h1>
+
+      <!-- Rating -->
+      <div class="rating-row" *ngIf="reviews.length > 0">
+        <span class="stars">
+          <span *ngFor="let s of getStars(averageRating)">{{ s }}</span>
+        </span>
+        <span class="rating-text">
+          {{ averageRating }} ({{ reviews.length }} reviews)
+        </span>
+      </div>
+
+      <p class="product-description">{{ product.description }}</p>
+
+      <!-- Price -->
+      <div class="price-section">
+        <span class="price">{{ product.price }} DT</span>
+        <span class="unit">/ {{ product.unit }}</span>
+      </div>
+
+      <!-- Stock -->
+      <div class="stock-info"
+           [class.out]="product.stockQuantity === 0">
+        {{ product.stockQuantity === 0 ?
+          '❌ Out of Stock' :
+          '✅ In Stock (' + product.stockQuantity + ' available)' }}
+      </div>
+
+      <!-- Qty + Add to Cart -->
+      <div class="add-section" *ngIf="product.stockQuantity! > 0">
+        <div class="qty-selector">
+          <button (click)="qty > 1 ? qty = qty - 1 : null">−</button>
+          <span>{{ qty }}</span>
+          <button (click)="qty < product.stockQuantity! ? qty = qty + 1 : null">+</button>
+        </div>
+        <button class="btn-add-cart" (click)="addToCart()">
+          🛒 Add to Cart
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- REVIEWS SECTION -->
+  <div class="reviews-section">
+    <h2>Customer Reviews</h2>
+
+    <!-- Review Form -->
+    <div class="review-form">
+      <h3>Leave a Review</h3>
+
+      <!-- Stars selector -->
+      <div class="star-selector">
+        <span
+          *ngFor="let i of [1,2,3,4,5]"
+          class="star"
+          [class.active]="i <= (hoverRating || newReview.rating)"
+          (click)="setRating(i)"
+          (mouseenter)="setHover(i)"
+          (mouseleave)="clearHover()">
+          ★
+        </span>
+      </div>
+      <span class="error-msg"
+            *ngIf="submitted && !newReview.rating">
+        ⚠️ Please select a rating
+      </span>
+
+      <textarea
+        [(ngModel)]="newReview.comment"
+        placeholder="Share your experience..."
+        rows="3">
+      </textarea>
+
+      <button class="btn-submit-review" (click)="submitReview()">
+        Submit Review
+      </button>
+    </div>
+
+    <!-- Reviews List -->
+    <div class="reviews-list">
+      <div *ngIf="reviews.length === 0" class="no-reviews">
+        No reviews yet — be the first! 🌟
+      </div>
+      <div class="review-card" *ngFor="let r of reviews">
+        <div class="review-header">
+          <div class="reviewer-avatar">U</div>
+          <div>
+            <div class="reviewer-name">Buyer #{{ r.buyerId }}</div>
+            <div class="review-stars">
+              <span *ngFor="let s of getStars(r.rating)">{{ s }}</span>
+            </div>
+          </div>
+          <div class="review-date">
+            {{ r.createdAt | date:'dd/MM/yyyy' }}
+          </div>
+        </div>
+        <p class="review-comment">{{ r.comment }}</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div *ngIf="loading" class="loading">⏳ Loading...</div>

@@ -1,0 +1,131 @@
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-brand">🌿 AgriHub</div>
+  <div class="navbar-center">
+    <input
+      type="text"
+      class="search-bar"
+      placeholder="🔍 Search products..."
+      [(ngModel)]="searchKeyword"
+      (input)="applyFilters()"
+    />
+  </div>
+  <div class="navbar-right">
+    <a routerLink="/seller" class="seller-link">
+      🏪 Seller Dashboard
+    </a>
+    <button class="cart-btn" (click)="goToCheckout()">
+      🛒 Cart
+      <span class="cart-count" *ngIf="cartCount > 0">
+        {{ cartCount }}
+      </span>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>Fresh from Tunisian Farms 🌾</h1>
+  <p>Directly from farmers to your table — fresh, bio, local</p>
+</div>
+
+<!-- FILTERS -->
+<div class="filters-bar">
+  <div class="filters-left">
+
+    <select
+      [(ngModel)]="selectedCategory"
+      (change)="applyFilters()"
+      class="filter-select">
+      <option [value]="0">All Categories</option>
+      <option *ngFor="let c of categories" [value]="c.id">
+        {{ c.name }}
+      </option>
+    </select>
+
+    <label class="bio-toggle">
+      <input
+        type="checkbox"
+        [(ngModel)]="showBioOnly"
+        (change)="applyFilters()"
+      />
+      🌿 Bio only
+    </label>
+
+    <button class="reset-btn"
+            *ngIf="searchKeyword || selectedCategory || showBioOnly"
+            (click)="resetFilters()">
+      ✕ Reset
+    </button>
+
+  </div>
+  <div class="filters-right">
+    <span class="results-count">
+      {{ filtered.length }} product(s) found
+    </span>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div *ngIf="loading" class="loading">⏳ Loading products...</div>
+
+<!-- EMPTY -->
+<div *ngIf="!loading && filtered.length === 0" class="empty-state">
+  <div class="empty-icon">🌱</div>
+  <h3>No products found</h3>
+  <p>Try different filters</p>
+  <button class="btn-primary" (click)="resetFilters()">
+    Reset Filters
+  </button>
+</div>
+
+<!-- PRODUCT GRID -->
+<div class="product-grid" *ngIf="!loading && filtered.length > 0">
+  <div
+    class="product-card"
+    *ngFor="let p of filtered"
+    (click)="goToDetail(p.id!)">
+
+    <!-- IMAGE PLACEHOLDER -->
+      <div class="product-img">
+    <img
+      *ngIf="p.images && p.images.length > 0"
+      [src]="'http://localhost:8080/AgriLink' + p.images[0].imageUrl"
+      [alt]="p.name"
+      style="width:100%; height:100%; object-fit:cover;"
+    />
+    <span
+      *ngIf="!p.images || p.images.length === 0"
+      class="product-emoji">
+      {{ p.isBio ? '🌿' : '🥬' }}
+    </span>
+    <span class="bio-badge" *ngIf="p.isBio">🌿 Bio</span>
+    <span class="certified-badge" *ngIf="p.isCertified">✅</span>
+    </div>
+
+    <!-- BODY -->
+    <div class="product-body">
+      <div class="product-category">
+        {{ p.category?.name || 'General' }}
+      </div>
+      <h3 class="product-name">{{ p.name }}</h3>
+      <p class="product-desc">
+        {{ p.description | slice:0:60 }}
+        {{ p.description && p.description.length > 60 ? '...' : '' }}
+      </p>
+      <div class="product-footer">
+        <div class="product-price">
+          {{ p.price }} DT
+          <span class="product-unit">/ {{ p.unit }}</span>
+        </div>
+        <button
+          class="add-to-cart"
+          (click)="addToCart(p, $event)"
+          [disabled]="p.stockQuantity === 0">
+          {{ p.stockQuantity === 0 ? '❌ Out' : '+ Cart' }}
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
