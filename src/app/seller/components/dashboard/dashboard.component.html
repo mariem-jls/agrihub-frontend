@@ -1,5 +1,4 @@
 <div class="dashboard-layout">
-
   <!-- SIDEBAR -->
   <div class="sidebar">
     <div class="sidebar-logo">
@@ -7,12 +6,25 @@
       <span>Seller Dashboard</span>
     </div>
     <nav class="sidebar-nav">
-      <a routerLink="/seller" routerLinkActive="active"
-         [routerLinkActiveOptions]="{exact: true}">
+      <a
+        routerLink="/seller"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
         📊 Dashboard
       </a>
       <a routerLink="/seller/products" routerLinkActive="active">
         🛒 My Products
+      </a>
+      <a routerLink="/seller/funding-projects" routerLinkActive="active">
+        💰 Funding Projects
+      </a>
+      <a routerLink="/seller/contributions" routerLinkActive="active">
+        💸 Contributions
+      </a>
+      <a routerLink="/seller/wallets" routerLinkActive="active"> 💰 Wallets </a>
+      <a routerLink="/seller/transactions" routerLinkActive="active">
+        💳 Transactions
       </a>
       <a routerLink="/seller/orders" routerLinkActive="active">
         📦 My Orders
@@ -29,7 +41,6 @@
 
   <!-- MAIN CONTENT -->
   <div class="seller-content">
-
     <div class="page-header">
       <div>
         <h1>Dashboard</h1>
@@ -39,7 +50,6 @@
 
     <!-- STATS -->
     <div class="stats-grid">
-
       <div class="stat-card green">
         <div class="stat-icon">🛒</div>
         <div class="stat-label">Total Products</div>
@@ -63,7 +73,6 @@
         <div class="stat-label">Low Stock</div>
         <div class="stat-value">{{ lowStockProducts }}</div>
       </div>
-
     </div>
 
     <!-- RECENT PRODUCTS -->
@@ -119,14 +128,11 @@
                 {{ o.status }}
               </span>
             </td>
-            <td>{{ o.createdAt | date:'dd/MM/yyyy' }}</td>
+            <td>{{ o.createdAt | date: "dd/MM/yyyy" }}</td>
           </tr>
         </tbody>
       </table>
-      <a routerLink="/seller/orders" class="btn-link">
-        View all orders →
-      </a>
+      <a routerLink="/seller/orders" class="btn-link"> View all orders → </a>
     </div>
-
   </div>
 </div>

@@ -1,0 +1,94 @@
+<div class="dashboard-layout">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <h2>🌿 AgriHub</h2>
+      <span>Seller Dashboard</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a routerLink="/seller" routerLinkActive="active"> 📊 Dashboard </a>
+      <a routerLink="/seller/products" routerLinkActive="active">
+        🛒 My Products
+      </a>
+      <a routerLink="/seller/funding-projects" routerLinkActive="active">
+        💰 Funding Projects
+      </a>
+      <a routerLink="/seller/contributions" routerLinkActive="active">
+        💸 Contributions
+      </a>
+      <a routerLink="/seller/orders" routerLinkActive="active">
+        📦 My Orders
+      </a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="user-avatar">T</div>
+      <div>
+        <strong>Mariem Jlassi</strong>
+        <p>📍 Nabeul</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="seller-content">
+    <div class="page-header">
+      <div>
+        <h1>Contributions</h1>
+        <p>Manage all contributions</p>
+      </div>
+    </div>
+
+    <!-- LOADING -->
+    <div *ngIf="loading" class="loading">Loading contributions...</div>
+
+    <!-- FILTRE GLOBAL -->
+    <div class="filters" style="margin-bottom: 1rem; text-align: left">
+      <input
+        type="text"
+        placeholder="Search by project, type or owner"
+        [(ngModel)]="searchText"
+        (input)="applyFilters()"
+        class="search-input"
+      />
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div *ngIf="!loading && contributions.length === 0" class="empty-state">
+      <div class="empty-icon">💸</div>
+      <h3>No contributions yet</h3>
+    </div>
+
+    <!-- TABLE -->
+    <div *ngIf="!loading && contributions.length > 0" class="table-card">
+      <table class="product-table">
+        <thead>
+          <tr>
+            <th>Project</th>
+            <th>Type</th>
+            <th>Investor</th>
+            <th>Amount</th>
+            <th>Percentage</th>
+            <th>Expected Return</th>
+            <th>Date</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of filteredContributions">
+            <td>
+              <strong>{{ c.projectName }}</strong>
+              <div class="product-unit">{{ c.description }}</div>
+            </td>
+            <td>{{ c.typeProjet }}</td>
+            <td>{{ c.username }}</td>
+            <td>{{ c.montant }} DT</td>
+            <td>{{ c.pourcentage * 100 | number: "1.0-2" }} %</td>
+            <td>{{ c.retourAttendu }} DT</td>
+            <td>{{ c.dateContribution | date: "short" }}</td>
+            <td>{{ c.statut }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

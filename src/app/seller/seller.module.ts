@@ -12,6 +12,10 @@ import { ProductListComponent } from './components/product-list/product-list.com
 import { ProductFormComponent } from './components/product-form/product-form.component';
 import { OrderListComponent } from './components/order-list/order-list.component';
 import { ProductImageUploadComponent } from './components/product-image-upload/product-image-upload.component';
+import { FundingProjectComponent } from './components/funding-project/funding-project.component';
+import { ContributionsComponent } from './components/contributions/contributions.component';
+import { WalletsComponent } from './components/wallets/wallets.component';
+import { TransactionsComponent } from './components/transactions/transactions.component';
 
 
 @NgModule({
@@ -20,14 +24,20 @@ import { ProductImageUploadComponent } from './components/product-image-upload/p
     ProductListComponent,
     ProductFormComponent,
     OrderListComponent,
-    ProductImageUploadComponent
+    ProductImageUploadComponent,
+    FundingProjectComponent,
+    ContributionsComponent,
+    WalletsComponent,
+    TransactionsComponent,
+
   ],
   imports: [
     CommonModule,
     FormsModule,
     HttpClientModule,
     SellerRoutingModule,
-    RouterModule        
+    RouterModule    ,
+        
   ]
 })
 export class SellerModule { }
