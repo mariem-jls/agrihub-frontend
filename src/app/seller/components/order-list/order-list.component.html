@@ -1,58 +1,37 @@
-<div class="dashboard-layout">
-
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-    <div class="sidebar-logo">
-      <h2>🌿 AgriHub</h2>
-      <span>Seller Dashboard</span>
-    </div>
-    <nav class="sidebar-nav">
-      <a routerLink="/seller"
-         routerLinkActive="active"
-         [routerLinkActiveOptions]="{exact: true}">
-        📊 Dashboard
-      </a>
-      <a routerLink="/seller/products" routerLinkActive="active">
-        🛒 My Products
-      </a>
-      <a routerLink="/seller/orders" routerLinkActive="active">
-        📦 My Orders
-      </a>
-    </nav>
-    <div class="sidebar-user">
-      <div class="user-avatar">T</div>
-      <div>
-        <strong>Mariem Jlassi</strong>
-        <p>📍 Nabeul</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- MAIN CONTENT -->
+  <!-- MAIN -->
   <div class="seller-content">
 
-    <!-- HEADER -->
     <div class="page-header">
-      <div>
-        <h1>My Orders</h1>
-        <p>{{ orders.length }} orders received</p>
-      </div>
+      <h1>My Orders</h1>
+      <p>{{ orders.length }} orders received</p>
     </div>
 
-    <!-- MESSAGE -->
     <div *ngIf="message" [class]="'alert alert-' + messageType">
       {{ message }}
     </div>
 
-    <!-- FILTER TABS -->
-    <div class="filter-tabs">
-      <button
-        *ngFor="let f of ['ALL','PENDING','CONFIRMED','PREPARING','SHIPPED','DELIVERED','CANCELLED']"
-        [class.active]="selectedFilter === f"
-        (click)="setFilter(f)">
+    <!-- TABS -->
+    <div class="tabs">
+      <button [class.active]="activeTab === 'active'"
+              (click)="setTab('active')">
+        Active
+        <span class="tab-count">{{ activeOrders.length }}</span>
+      </button>
+      <button [class.active]="activeTab === 'archive'"
+              (click)="setTab('archive')">
+        Archive
+        <span class="tab-count">{{ archiveOrders.length }}</span>
+      </button>
+    </div>
+
+    <!-- PILLS -->
+    <div class="pills">
+      <button *ngFor="let f of currentFilters"
+              [class.active]="selectedFilter === f"
+              (click)="setFilter(f)">
         {{ f }}
-        <span class="tab-count">
-          {{ f === 'ALL' ? orders.length : filterByStatus(f).length }}
+        <span *ngIf="f !== 'ALL'">
+          {{ filterByStatus(f).length }}
         </span>
       </button>
     </div>
@@ -60,106 +39,97 @@
     <!-- LOADING -->
     <div *ngIf="loading" class="loading">⏳ Loading orders...</div>
 
-    <!-- EMPTY STATE -->
-    <div *ngIf="!loading && filteredOrders.length === 0"
-         class="empty-state">
+    <!-- EMPTY -->
+    <div *ngIf="!loading && currentTabOrders.length === 0" class="empty-state">
       <div class="empty-icon">📭</div>
       <h3>No orders found</h3>
       <p>No orders with this status yet</p>
     </div>
 
-    <!-- ORDERS -->
-    <div *ngIf="!loading && filteredOrders.length > 0"
-         class="orders-list">
+    <!-- ORDERS ACCORDION -->
+    <div class="orders-list" *ngIf="!loading && currentTabOrders.length > 0">
 
-      <div *ngFor="let order of filteredOrders"
-           class="order-card">
+      <div *ngFor="let order of currentTabOrders"
+           class="order-card"
+           [class.expanded]="expandedOrderId === order.id">
 
-        <!-- ORDER HEADER -->
-        <div class="order-header">
-          <div class="order-info">
-            <strong>{{ order.orderNumber }}</strong>
-            <span class="order-date">
-              {{ order.createdAt | date:'dd/MM/yyyy' }}
-            </span>
+        <!-- CARD HEADER — toujours visible -->
+        <div class="card-header" (click)="toggleOrder(order.id!)">
+          <div class="card-left">
+            <span class="order-number">{{ order.orderNumber }}</span>
+            <span class="order-date">{{ order.createdAt | date:'dd/MM/yyyy' }}</span>
           </div>
-          <div class="order-right">
-            <span [class]="'badge badge-' + order.status?.toLowerCase()">
+          <div class="card-right">
+            <span [class]="'status-badge ' + order.status?.toLowerCase()">
               {{ order.status }}
             </span>
-            <span class="order-total">
-              {{ order.totalAmount }} DT
+            <span class="order-total">{{ order.totalAmount }} DT</span>
+            <span class="chevron">
+              {{ expandedOrderId === order.id ? '▲' : '▼' }}
             </span>
           </div>
         </div>
 
-        <!-- DELIVERY ADDRESS -->
-        <div class="order-address">
-          📍 {{ order.deliveryAddress || '—' }}
-        </div>
+        <!-- CARD BODY — visible si expanded -->
+        <div class="card-body" *ngIf="expandedOrderId === order.id">
 
-        <!-- PIPELINE -->
-        <div class="pipeline" *ngIf="order.status !== 'CANCELLED'">
-          <div class="pipeline-track">
-            <div class="pipeline-progress"
-                 [style.width]="getPipelineProgress(order.status!) + '%'">
-            </div>
-          </div>
-          <div class="pipeline-steps">
-            <div
-              *ngFor="let step of pipeline"
-              class="pipeline-step"
-              [class.done]="isStepDone(order.status!, step)"
-              [class.current]="isStepCurrent(order.status!, step)">
-              <div class="step-dot">
-                <span *ngIf="isStepDone(order.status!, step)">✓</span>
-                <span *ngIf="isStepCurrent(order.status!, step)">●</span>
+          <!-- ITEMS -->
+          <div class="section-label">ITEMS ORDERED</div>
+          <div class="items-list">
+            <div *ngFor="let item of order.items" class="order-item">
+              <div class="item-img">
+                <img *ngIf="item.productImageUrl" [src]="item.productImageUrl"
+                     [alt]="item.productName" />
+                <div *ngIf="!item.productImageUrl" class="img-placeholder">🌿</div>
               </div>
-              <div class="step-label">{{ step }}</div>
+              <span class="item-name">{{ item.productName }}</span>
+              <span class="item-qty">x{{ item.quantity }}</span>
+              <span class="item-price">{{ item.subtotal }} DT</span>
             </div>
           </div>
+
+          <!-- META GRID -->
+          <div class="meta-grid">
+            <div class="meta-box">
+              <span class="meta-label">Delivery address</span>
+              <span class="meta-value">{{ order.deliveryAddress || '—' }}</span>
+            </div>
+            <div class="meta-box">
+              <span class="meta-label">Payment</span>
+              <span class="meta-value">
+                {{ order.payment?.method === 'CASH_ON_DELIVERY' ? 'Cash on delivery' :
+                   order.payment?.method === 'STRIPE' ? 'Stripe' : '—' }}
+              </span>
+            </div>
+            <div class="meta-box" *ngIf="order.trackingNumber">
+              <span class="meta-label">Tracking</span>
+              <span class="meta-value">
+                {{ order.trackingNumber }}
+                <span *ngIf="order.carrierName"> — {{ order.carrierName }}</span>
+              </span>
+            </div>
+            <div class="meta-box" *ngIf="order.cancellationReason">
+              <span class="meta-label">Cancellation reason</span>
+              <span class="meta-value">{{ order.cancellationReason }}</span>
+            </div>
+          </div>
+
+          <!-- ACTIONS -->
+          <div class="card-actions"
+               *ngIf="order.status !== 'DELIVERED' && order.status !== 'CANCELLED'">
+            <button class="btn-advance"
+                    *ngIf="getNextStatus(order.status!)"
+                    (click)="advanceStatus(order)">
+              ➡️ Mark as {{ getNextStatus(order.status!) }}
+            </button>
+            <button class="btn-cancel"
+                    *ngIf="order.status === 'PENDING' || order.status === 'CONFIRMED'"
+                    (click)="cancelOrder(order)">
+              ✕ Cancel order
+            </button>
+          </div>
+
         </div>
-
-        <!-- CANCELLED -->
-        <div class="cancelled-banner"
-             *ngIf="order.status === 'CANCELLED'">
-          ❌ This order was cancelled
-          <span *ngIf="order.cancellationReason">
-            — {{ order.cancellationReason }}
-          </span>
-        </div>
-
-        <!-- TRACKING INFO -->
-        <div class="tracking-info"
-             *ngIf="order.trackingNumber">
-          📦 Tracking: <strong>{{ order.trackingNumber }}</strong>
-          <span *ngIf="order.carrierName">
-            via <strong>{{ order.carrierName }}</strong>
-          </span>
-        </div>
-
-        <!-- ACTIONS -->
-        <div class="order-actions"
-             *ngIf="order.status !== 'DELIVERED' && order.status !== 'CANCELLED'">
-
-          <button
-            class="btn btn-advance"
-            *ngIf="getNextStatus(order.status!)"
-            (click)="advanceStatus(order)">
-            ➡️ Mark as {{ getNextStatus(order.status!) }}
-          </button>
-
-          <button
-            class="btn btn-cancel"
-            *ngIf="order.status === 'PENDING' || order.status === 'CONFIRMED'"
-            (click)="cancelOrder(order)">
-            ✕ Cancel Order
-          </button>
-
-        </div>
-
       </div>
     </div>
-
   </div>
-</div>

@@ -2,12 +2,8 @@ import { OrderItem } from './order-item.model';
 import { Payment } from './payment.model';
 
 export type OrderStatus =
-  | 'PENDING'
-  | 'CONFIRMED'
-  | 'PREPARING'
-  | 'SHIPPED'
-  | 'DELIVERED'
-  | 'CANCELLED';
+  | 'PENDING' | 'CONFIRMED' | 'PREPARING'
+  | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
 
 export interface Order {
   id?: number;

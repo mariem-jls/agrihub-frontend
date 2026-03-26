@@ -39,6 +39,17 @@ export class ProductService {
     );
   }
 
+  toggleStatus(product: Product, sellerId: number): Observable<Product> {
+  const updated = {
+    ...product,
+    status: product.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
+  };
+  return this.http.put<Product>(
+    `${this.url}/updateProduct/${sellerId}`,
+    updated
+  );
+}
+
   delete(id: number, sellerId: number): Observable<void> {
     return this.http.delete<void>(
       `${this.url}/deleteProduct/${id}/${sellerId}`

@@ -7,6 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 
 import { SellerRoutingModule } from './seller-routing.module';
+import { SellerLayoutComponent } from './layout/seller-layout.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { ProductListComponent } from './components/product-list/product-list.component';
 import { ProductFormComponent } from './components/product-form/product-form.component';
@@ -16,6 +17,7 @@ import { ProductImageUploadComponent } from './components/product-image-upload/p
 
 @NgModule({
   declarations: [
+    SellerLayoutComponent,
     DashboardComponent,
     ProductListComponent,
     ProductFormComponent,

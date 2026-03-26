@@ -15,6 +15,12 @@ export class OrderListComponent implements OnInit {
   message = '';
   messageType = '';
 
+  activeTab: 'active' | 'archive' = 'active';
+expandedOrderId: number | null = null;
+
+activeStatuses = ['PENDING', 'CONFIRMED', 'PREPARING', 'SHIPPED'];
+archiveStatuses = ['DELIVERED', 'CANCELLED'];
+
   // Pipeline des statuts dans l'ordre
   pipeline: OrderStatus[] = [
     'PENDING', 'CONFIRMED', 'PREPARING', 'SHIPPED', 'DELIVERED'
@@ -133,4 +139,37 @@ export class OrderListComponent implements OnInit {
   get filteredOrders(): Order[] {
     return this.filterByStatus(this.selectedFilter);
   }
+
+  setTab(tab: 'active' | 'archive'): void {
+  this.activeTab = tab;
+  this.selectedFilter = 'ALL';
+}
+
+toggleOrder(id: number): void {
+  this.expandedOrderId = this.expandedOrderId === id ? null : id;
+}
+
+get activeOrders(): Order[] {
+  return this.orders.filter(o => this.activeStatuses.includes(o.status!));
+}
+
+get archiveOrders(): Order[] {
+  return this.orders.filter(o => this.archiveStatuses.includes(o.status!));
+}
+
+get currentTabOrders(): Order[] {
+  const base = this.activeTab === 'active' ? this.activeOrders : this.archiveOrders;
+  if (this.selectedFilter === 'ALL') return base;
+  return base.filter(o => o.status === this.selectedFilter);
+}
+
+get pendingCount(): number {
+  return this.orders.filter(o => o.status === 'PENDING').length;
+}
+
+get currentFilters(): string[] {
+  return this.activeTab === 'active'
+    ? ['ALL', 'PENDING', 'CONFIRMED', 'PREPARING', 'SHIPPED']
+    : ['ALL', 'DELIVERED', 'CANCELLED'];
+}
 }

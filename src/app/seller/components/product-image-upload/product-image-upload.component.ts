@@ -60,56 +60,84 @@ export class ProductImageUploadComponent implements OnInit {
   }
 
   uploadFile(file: File): void {
-
-    // Validation type
-    if (!file.type.startsWith('image/')) {
-      this.showMessage('Only image files are allowed ⚠️', 'error');
-      return;
-    }
-
-    // Validation taille (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      this.showMessage('File size must be less than 5MB ⚠️', 'error');
-      return;
-    }
-
-    this.uploading = true;
-    const isPrimary = this.images.length === 0;
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    this.http.post<any>(
-      `${API_BASE_URL}/marketplace/image/upload/${this.productId}?isPrimary=${isPrimary}`,
-      formData
-    ).subscribe({
-      next: (res) => {
-        this.uploading = false;
-        if (res.status === 'success') {
-          this.showMessage('Image uploaded successfully ✅', 'success');
-          this.loadImages();
-        } else {
-          this.showMessage('Upload failed ❌', 'error');
-        }
-      },
-      error: (err) => {
-        console.error(err);
-        this.uploading = false;
-        this.showMessage('Upload error ❌', 'error');
-      }
-    });
+  if (!file.type.startsWith('image/')) {
+    this.showMessage('Only image files are allowed ⚠️', 'error');
+    return;
   }
 
-  setPrimary(image: ProductImage): void {
-    const updated = { ...image, isPrimary: true };
-    this.productImageService.update(updated).subscribe({
+  if (file.size > 5 * 1024 * 1024) {
+    this.showMessage('File size must be less than 5MB ⚠️', 'error');
+    return;
+  }
+
+  this.uploading = true;
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  // CHANGEMENT CRUCIAL : ne pas définir isPrimary automatiquement
+  // Laisser false, l'utilisateur choisira ensuite
+  this.http.post<any>(
+    `${API_BASE_URL}/marketplace/image/upload/${this.productId}?isPrimary=false`,
+    formData
+  ).subscribe({
+    next: (res) => {
+      this.uploading = false;
+      if (res.status === 'success') {
+        this.showMessage('Image uploaded successfully ✅', 'success');
+        this.loadImages();
+        
+        // Si c'est la première image, proposer de la mettre en primary
+        if (this.images.length === 0) {
+          setTimeout(() => {
+            this.showMessage('Tip: Click the star icon to set this image as primary 🌟', 'info');
+          }, 500);
+        }
+      } else {
+        this.showMessage('Upload failed ❌', 'error');
+      }
+    },
+    error: (err) => {
+      console.error(err);
+      this.uploading = false;
+      this.showMessage('Upload error ❌', 'error');
+    }
+  });
+}
+
+setPrimary(image: ProductImage): void {
+  if (!image.id) {
+    this.showMessage('Cannot set primary: image ID missing ❌', 'error');
+    return;
+  }
+
+  // D'abord, désactiver primary sur toutes les images
+  const disablePrimaryRequests = this.images
+    .filter(img => img.isPrimary && img.id !== image.id)
+    .map(img => {
+      const disableImage = { ...img, isPrimary: false };
+      return this.productImageService.update(disableImage).toPromise();
+    });
+
+  // Attendre que toutes les désactivations soient faites
+  Promise.all(disablePrimaryRequests).then(() => {
+    // Puis activer primary sur l'image sélectionnée
+    const updatedImage = { ...image, isPrimary: true };
+    this.productImageService.update(updatedImage).subscribe({
       next: () => {
         this.showMessage('Primary image updated ✅', 'success');
         this.loadImages();
       },
-      error: (err) => console.error(err)
+      error: (err) => {
+        console.error('Error setting primary image:', err);
+        this.showMessage('Failed to set primary image ❌', 'error');
+      }
     });
-  }
+  }).catch(err => {
+    console.error('Error disabling other primaries:', err);
+    this.showMessage('Failed to update primary image ❌', 'error');
+  });
+}
 
   deleteImage(id: number): void {
     if (!confirm('Delete this image?')) return;
