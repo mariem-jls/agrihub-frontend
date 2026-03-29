@@ -8,6 +8,7 @@ import { FundingProjectComponent } from './components/funding-project/funding-pr
 import { ContributionsComponent } from './components/contributions/contributions.component';
 import { WalletsComponent } from './components/wallets/wallets.component';
 import { TransactionsComponent } from './components/transactions/transactions.component';
+import { ReclamationsComponent } from './components/reclamations/reclamations.component';
 
 const routes: Routes = [
   { path: '', component: DashboardComponent },
@@ -19,6 +20,7 @@ const routes: Routes = [
   { path: 'contributions', component: ContributionsComponent },
   { path: 'wallets', component: WalletsComponent },
   { path: 'transactions', component: TransactionsComponent },
+  { path: 'reclamations', component: ReclamationsComponent },
 ];
 
 @NgModule({

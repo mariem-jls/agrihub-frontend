@@ -16,6 +16,7 @@ import { FundingProjectComponent } from './components/funding-project/funding-pr
 import { ContributionsComponent } from './components/contributions/contributions.component';
 import { WalletsComponent } from './components/wallets/wallets.component';
 import { TransactionsComponent } from './components/transactions/transactions.component';
+import { ReclamationsComponent } from './components/reclamations/reclamations.component';
 
 
 @NgModule({
@@ -29,6 +30,7 @@ import { TransactionsComponent } from './components/transactions/transactions.co
     ContributionsComponent,
     WalletsComponent,
     TransactionsComponent,
+    ReclamationsComponent,
 
   ],
   imports: [
