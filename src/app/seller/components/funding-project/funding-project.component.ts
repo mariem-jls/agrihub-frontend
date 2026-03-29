@@ -4,7 +4,7 @@ import {
   FundingProjectDTO,
 } from '../../../core/services/funding-projects.service';
 
-import { FormControl } from '@angular/forms';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-funding-project',
@@ -16,10 +16,7 @@ export class FundingProjectComponent implements OnInit {
   projects: FundingProjectDTO[] = [];
   filteredProjects: FundingProjectDTO[] = [];
 
-  // 🔹 filtres
   searchText: string = '';
-  filterUser: string = '';
-  filterMinContrib: number | null = null;
 
   constructor(private fundingService: FundingProjectsService) {}
 
@@ -32,7 +29,7 @@ export class FundingProjectComponent implements OnInit {
     this.fundingService.getAllProjects().subscribe({
       next: (data) => {
         this.projects = data;
-        this.filteredProjects = data; // initialisation
+        this.filteredProjects = data;
         this.loading = false;
       },
       error: (err) => {
@@ -51,6 +48,54 @@ export class FundingProjectComponent implements OnInit {
         p.type.toLowerCase().includes(search) ||
         p.userName?.toLowerCase().includes(search)
       );
+    });
+  }
+
+  // ✅ ACCEPT
+  acceptProject(id: number) {
+    Swal.fire({
+      title: 'Confirmer ?',
+      text: 'Accepter ce projet ?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Oui',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.fundingService.acceptProject(id).subscribe({
+          next: () => {
+            Swal.fire('Succès', 'Projet accepté', 'success');
+            this.fetchProjects(); // refresh
+          },
+          error: (err) => {
+            console.error(err);
+            Swal.fire('Erreur', 'Impossible d’accepter', 'error');
+          },
+        });
+      }
+    });
+  }
+
+  // ❌ REJECT
+  rejectProject(id: number) {
+    Swal.fire({
+      title: 'Confirmer ?',
+      text: 'Refuser ce projet ?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Oui',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.fundingService.rejectProject(id).subscribe({
+          next: () => {
+            Swal.fire('Succès', 'Projet refusé', 'success');
+            this.fetchProjects(); // refresh
+          },
+          error: (err) => {
+            console.error(err);
+            Swal.fire('Erreur', 'Impossible de refuser', 'error');
+          },
+        });
+      }
     });
   }
 }

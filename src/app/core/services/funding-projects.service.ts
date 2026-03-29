@@ -8,14 +8,14 @@ export interface FundingProjectDTO {
   description: string;
   objectif: number;
   montantCollecte: number;
-  dateDebut: string; // ISO string
-  dateFin: string;   // ISO string
+  dateDebut: string;
+  dateFin: string;
   statut: 'PENDING' | 'ACTIVE' | 'FUNDED' | 'FAILED';
   type: 'CULTURE' | 'MATERIEL' | 'SERRE';
   typeRetour: 'NONE' | 'ARGENT_VIRTUEL';
   userId?: number;
-  contributionCount?: number; // optionnel
-  userName?: string; // optionnel, pour afficher le nom du propriétaire
+  contributionCount?: number;
+  userName?: string;
 }
 
 @Injectable({
@@ -26,15 +26,25 @@ export class FundingProjectsService {
 
   constructor(private http: HttpClient) {}
 
-  getAllProjects(): Observable<any[]> {
-    return this.http.get<any[]>(this.apiUrl);
+  getAllProjects(): Observable<FundingProjectDTO[]> {
+    return this.http.get<FundingProjectDTO[]>(this.apiUrl);
   }
 
-  getProjectById(projectId: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/${projectId}`);
+  getProjectById(projectId: number): Observable<FundingProjectDTO> {
+    return this.http.get<FundingProjectDTO>(`${this.apiUrl}/${projectId}`);
   }
 
-  getProjectsByUser(userId: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/user/${userId}`);
+  getProjectsByUser(userId: number): Observable<FundingProjectDTO[]> {
+    return this.http.get<FundingProjectDTO[]>(`${this.apiUrl}/user/${userId}`);
+  }
+
+  // ✅ ACCEPT
+  acceptProject(id: number): Observable<any> {
+    return this.http.put(`${this.apiUrl}/accept/${id}`, {});
+  }
+
+  // ❌ REJECT
+  rejectProject(id: number): Observable<any> {
+    return this.http.put(`${this.apiUrl}/reject/${id}`, {});
   }
 }

@@ -69,12 +69,12 @@
             <th>Status</th>
             <th>Owner</th>
             <th>Contributions</th>
+            <th>Actions</th>
           </tr>
         </thead>
 
         <tbody>
           <tr *ngFor="let p of filteredProjects">
-
             <td>
               <strong>{{ p.titre }}</strong>
               <div class="product-unit">
@@ -104,6 +104,27 @@
             <td>{{ p.userName }}</td>
             <td>
               {{ p.contributionCount || 0 }}
+            </td>
+            <td>
+              <div *ngIf="p.statut === 'PENDING'; else noActions">
+                <button
+                  class="btn btn-success btn-sm me-2"
+                  (click)="acceptProject(p.id)"
+                >
+                  ✅ Accept
+                </button>
+
+                <button
+                  class="btn btn-danger btn-sm"
+                  (click)="rejectProject(p.id)"
+                >
+                  ❌ Reject
+                </button>
+              </div>
+
+              <ng-template #noActions>
+                <span class="text-muted">-</span>
+              </ng-template>
             </td>
           </tr>
         </tbody>
