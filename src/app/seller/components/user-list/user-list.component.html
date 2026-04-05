@@ -1,0 +1,122 @@
+<div class="dashboard-layout">
+
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <h2>AgriHub</h2>
+      <span>Seller Dashboard</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a routerLink="/seller" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        Dashboard
+      </a>
+      <a routerLink="/seller/users" routerLinkActive="active">
+        Users
+      </a>
+      <a routerLink="/seller/products" routerLinkActive="active">
+        My Products
+      </a>
+      <a routerLink="/seller/orders" routerLinkActive="active">
+        My Orders
+      </a>
+    </nav>
+
+    <div class="sidebar-user">
+      <button class="logout-btn" (click)="logout()">
+        Logout
+      </button>
+    </div>
+  </div>
+
+  <div class="seller-content">
+    <div class="page-header">
+      <div>
+        <h1>Users</h1>
+        <p>Manage platform users</p>
+      </div>
+      <button class="btn btn-primary" (click)="goToAdd()">
+        + Add New User
+      </button>
+    </div>
+
+    <div *ngIf="message" [class]="'alert alert-' + messageType">
+      {{ message }}
+    </div>
+
+    <div *ngIf="loading" class="loading">
+      Loading users...
+    </div>
+
+    <div *ngIf="!loading && users.length === 0" class="empty-state">
+      <div class="empty-icon">User</div>
+      <h3>No users found</h3>
+      <p>Start by adding your first user</p>
+      <button class="btn btn-primary" (click)="goToAdd()">
+        + Add User
+      </button>
+    </div>
+
+    <div *ngIf="!loading && users.length > 0" class="table-card">
+      <table class="product-table">
+        <thead>
+        <tr>
+          <th>#</th>
+          <th>Username</th>
+          <th>Full Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Address</th>
+          <th>User Type</th>
+          <th>Account</th>
+          <th>Onboarding</th>
+          <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let u of users">
+          <td>{{ u.id }}</td>
+          <td><strong>{{ u.username }}</strong></td>
+          <td>{{ u.fullName || '-' }}</td>
+          <td>{{ u.email || '-' }}</td>
+          <td>{{ u.phone || '-' }}</td>
+          <td>{{ u.address || '-' }}</td>
+          <td>
+              <span [class]="'badge ' + getUserTypeClass(u.userType)">
+                {{ u.userType || '-' }}
+              </span>
+          </td>
+          <td>
+              <span [class]="'badge ' + getAccountStatusClass(u)">
+                {{ getAccountStatusLabel(u) }}
+              </span>
+            <div *ngIf="isOrphaned(u)" class="account-hint">
+              Delete and recreate required
+            </div>
+          </td>
+          <td>
+              <span [class]="'badge ' + (u.onboardingCompleted ? 'badge-active' : 'badge-inactive')">
+                {{ u.onboardingCompleted ? 'Completed' : 'Pending' }}
+              </span>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn btn-sm btn-edit" (click)="goToEdit(u.id!)">
+                Edit
+              </button>
+              <button *ngIf="u.accountEnabled && !isOrphaned(u)" class="btn btn-sm btn-delete" (click)="lockUser(u)">
+                Lock
+              </button>
+              <button *ngIf="!u.accountEnabled && !isOrphaned(u)" class="btn btn-sm btn-edit" (click)="unlockUser(u)">
+                Unlock
+              </button>
+              <button *ngIf="isOrphaned(u)" class="btn btn-sm btn-muted" type="button" disabled>
+                Keycloak Missing
+              </button>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

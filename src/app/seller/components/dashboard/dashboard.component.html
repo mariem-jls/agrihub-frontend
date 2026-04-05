@@ -1,0 +1,135 @@
+<div class="dashboard-layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <h2>🌿 AgriHub</h2>
+      <span>Seller Dashboard</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a routerLink="/seller" routerLinkActive="active"
+         [routerLinkActiveOptions]="{exact: true}">
+        📊 Dashboard
+      </a>
+      <a routerLink="/seller/users" routerLinkActive="active">
+        👤 Users
+      </a>
+      <a routerLink="/seller/products" routerLinkActive="active">
+        🛒 My Products
+      </a>
+      <a routerLink="/seller/orders" routerLinkActive="active">
+        📦 My Orders
+      </a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="user-avatar">T</div>
+      <div>
+        <strong>Mariem Jlassi</strong>
+        <p>📍 Nabeul</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="seller-content">
+
+    <div class="page-header">
+      <div>
+        <h1>Dashboard</h1>
+        <p>Welcome back, Mariem 👋</p>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-grid">
+
+      <div class="stat-card green">
+        <div class="stat-icon">🛒</div>
+        <div class="stat-label">Total Products</div>
+        <div class="stat-value">{{ totalProducts }}</div>
+      </div>
+
+      <div class="stat-card gold">
+        <div class="stat-icon">📦</div>
+        <div class="stat-label">Total Orders</div>
+        <div class="stat-value">{{ totalOrders }}</div>
+      </div>
+
+      <div class="stat-card blue">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-label">Pending Orders</div>
+        <div class="stat-value">{{ pendingOrders }}</div>
+      </div>
+
+      <div class="stat-card red">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-label">Low Stock</div>
+        <div class="stat-value">{{ lowStockProducts }}</div>
+      </div>
+
+    </div>
+
+    <!-- RECENT PRODUCTS -->
+    <div class="section">
+      <h2>Recent Products</h2>
+      <table class="simple-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of products.slice(0, 5)">
+            <td>{{ p.name }}</td>
+            <td>{{ p.price }} DT</td>
+            <td [class.low]="p.stockQuantity! < 5">
+              {{ p.stockQuantity }}
+            </td>
+            <td>
+              <span [class]="'badge badge-' + p.status?.toLowerCase()">
+                {{ p.status }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <a routerLink="/seller/products" class="btn-link">
+        View all products →
+      </a>
+    </div>
+
+    <!-- RECENT ORDERS -->
+    <div class="section">
+      <h2>Recent Orders</h2>
+      <table class="simple-table">
+        <thead>
+          <tr>
+            <th>Order #</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let o of orders.slice(0, 5)">
+            <td>{{ o.orderNumber }}</td>
+            <td>{{ o.totalAmount }} DT</td>
+            <td>
+              <span [class]="'badge badge-' + o.status?.toLowerCase()">
+                {{ o.status }}
+              </span>
+            </td>
+            <td>{{ o.createdAt | date:'dd/MM/yyyy' }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <a routerLink="/seller/orders" class="btn-link">
+        View all orders →
+      </a>
+    </div>
+
+  </div>
+</div>

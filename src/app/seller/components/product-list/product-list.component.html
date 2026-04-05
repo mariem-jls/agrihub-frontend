@@ -1,0 +1,138 @@
+<div class="dashboard-layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <h2>🌿 AgriHub</h2>
+      <span>Seller Dashboard</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a routerLink="/seller" routerLinkActive="active"
+         [routerLinkActiveOptions]="{exact: true}">
+        📊 Dashboard
+      </a>
+      <a routerLink="/seller/users" routerLinkActive="active">
+        👤 Users
+      </a>
+      <a routerLink="/seller/products" routerLinkActive="active">
+        🛒 My Products
+      </a>
+      <a routerLink="/seller/orders" routerLinkActive="active">
+        📦 My Orders
+      </a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="user-avatar">T</div>
+      <div>
+        <strong>Mariem Jlassi</strong>
+        <p>📍 Nabeul</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="seller-content">
+
+    <!-- HEADER -->
+    <div class="page-header">
+      <div>
+        <h1>My Products</h1>
+        <p>Manage your marketplace products</p>
+      </div>
+      <button class="btn btn-primary" (click)="goToAdd()">
+        + Add New Product
+      </button>
+    </div>
+
+    <!-- MESSAGE -->
+    <div *ngIf="message"
+         [class]="'alert alert-' + messageType">
+      {{ message }}
+    </div>
+
+    <!-- LOADING -->
+    <div *ngIf="loading" class="loading">
+      Loading products...
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div *ngIf="!loading && products.length === 0" class="empty-state">
+      <div class="empty-icon">🌱</div>
+      <h3>No products yet</h3>
+      <p>Start by adding your first product</p>
+      <button class="btn btn-primary" (click)="goToAdd()">
+        + Add Product
+      </button>
+    </div>
+
+    <!-- TABLE -->
+    <div *ngIf="!loading && products.length > 0" class="table-card">
+      <table class="product-table">
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>#</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Bio</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of products">
+            <td>
+      <div class="table-img">
+        <img
+          *ngIf="p.images && p.images.length > 0"
+          [src]="'http://localhost:8080/AgriLink' + p.images[0].imageUrl"
+          [alt]="p.name"
+        />
+        <span *ngIf="!p.images || p.images.length === 0">
+          {{ p.isBio ? '🌿' : '🥬' }}
+        </span>
+      </div>
+    </td>
+
+            <td>{{ p.id }}</td>
+            <td>
+              <strong>{{ p.name }}</strong>
+              <div class="product-unit">{{ p.unit }}</div>
+            </td>
+            <td>{{ p.category?.name || '—' }}</td>
+            <td><strong>{{ p.price }} DT</strong></td>
+            <td>
+              <span [class]="'stock-badge ' + getStockClass(p.stockQuantity)">
+                {{ p.stockQuantity }} — {{ getStockLabel(p.stockQuantity) }}
+              </span>
+            </td>
+            <td>
+              <span *ngIf="p.isBio" class="badge badge-bio">🌿 Bio</span>
+              <span *ngIf="!p.isBio" class="text-muted">—</span>
+            </td>
+            <td>
+              <span [class]="'badge badge-' + p.status?.toLowerCase()">
+                {{ p.status }}
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn btn-sm btn-edit"
+                        (click)="goToEdit(p.id!)">
+                  ✏️ Edit
+                </button>
+                <button class="btn btn-sm btn-delete"
+                        (click)="delete(p.id!)">
+                  🗑️ Delete
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>

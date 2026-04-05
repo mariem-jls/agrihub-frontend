@@ -1,0 +1,276 @@
+<div class="dashboard-layout">
+
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <h2>AgriHub</h2>
+      <span>Seller Dashboard</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a routerLink="/seller" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        Dashboard
+      </a>
+      <a routerLink="/seller/users" routerLinkActive="active">
+        Users
+      </a>
+      <a routerLink="/seller/products" routerLinkActive="active">
+        My Products
+      </a>
+      <a routerLink="/seller/orders" routerLinkActive="active">
+        My Orders
+      </a>
+    </nav>
+
+    <div class="sidebar-user">
+      <button class="logout-btn" (click)="logout()">
+        Logout
+      </button>
+    </div>
+  </div>
+
+  <div class="seller-content">
+    <div class="page-header">
+      <div>
+        <h1>{{ isEditMode ? 'Edit User' : 'Add New User' }}</h1>
+        <p>
+          {{ isEditMode
+          ? 'Update business profile fields'
+          : 'Fill in the details to create a new business user' }}
+        </p>
+      </div>
+      <button class="btn btn-secondary" (click)="cancel()">
+        Back to Users
+      </button>
+    </div>
+
+    <div *ngIf="message" [class]="'alert alert-' + messageType">
+      {{ message }}
+    </div>
+
+    <div *ngIf="loading" class="loading">
+      <span>Loading user...</span>
+    </div>
+
+    <div *ngIf="!loading" class="form-card">
+
+      <div class="form-group">
+        <label>
+          Username
+          <span class="required">*</span>
+        </label>
+
+        <input
+          *ngIf="!isEditMode"
+          type="text"
+          [(ngModel)]="createRequest.username"
+          (ngModelChange)="clearFieldError('username')"
+          placeholder="Enter username"
+          [class.input-valid]="createRequest.username && createRequest.username.trim() !== ''"
+          [class.input-error]="isUsernameInvalid()"
+        />
+
+        <input
+          *ngIf="isEditMode"
+          type="text"
+          [value]="originalUser?.username || ''"
+          disabled
+        />
+
+        <span class="error-msg" *ngIf="isUsernameInvalid()">
+          {{ getFieldError('username') }}
+        </span>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>
+            Email
+            <span class="required" *ngIf="!isEditMode">*</span>
+          </label>
+
+          <input
+            *ngIf="!isEditMode"
+            type="email"
+            [(ngModel)]="createRequest.email"
+            (ngModelChange)="clearFieldError('email')"
+            placeholder="Enter email"
+            [class.input-error]="isEmailInvalid()"
+          />
+
+          <input
+            *ngIf="isEditMode"
+            type="email"
+            [value]="originalUser?.email || ''"
+            disabled
+          />
+
+          <span class="error-msg" *ngIf="isEmailInvalid()">
+            {{ getFieldError('email') }}
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label>
+            Full Name
+            <span class="required">*</span>
+          </label>
+
+          <input
+            *ngIf="!isEditMode"
+            type="text"
+            [(ngModel)]="createRequest.fullName"
+            (ngModelChange)="clearFieldError('fullName')"
+            placeholder="Enter full name"
+            [class.input-error]="isFullNameInvalid()"
+          />
+
+          <input
+            *ngIf="isEditMode"
+            type="text"
+            [(ngModel)]="updateRequest.fullName"
+            (ngModelChange)="clearFieldError('fullName')"
+            placeholder="Enter full name"
+            [class.input-error]="isFullNameInvalid()"
+          />
+
+          <span class="error-msg" *ngIf="isFullNameInvalid()">
+            {{ getFieldError('fullName') }}
+          </span>
+        </div>
+      </div>
+
+      <div *ngIf="!isEditMode" class="form-group">
+        <label>
+          Temporary Password
+          <span class="required">*</span>
+        </label>
+        <input
+          type="password"
+          [(ngModel)]="createRequest.temporaryPassword"
+          (ngModelChange)="clearFieldError('temporaryPassword')"
+          placeholder="Enter temporary password"
+          [class.input-error]="isTemporaryPasswordInvalid()"
+        />
+        <small class="helper-text">
+          Use at least 8 characters with uppercase, lowercase, a number, and a special character.
+        </small>
+        <span class="error-msg" *ngIf="isTemporaryPasswordInvalid()">
+          {{ getFieldError('temporaryPassword') }}
+        </span>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>
+            Phone
+            <span class="required">*</span>
+          </label>
+
+          <input
+            *ngIf="!isEditMode"
+            type="text"
+            [(ngModel)]="createRequest.phone"
+            (ngModelChange)="clearFieldError('phone')"
+            placeholder="Enter phone number"
+            [class.input-error]="isPhoneInvalid()"
+          />
+
+          <input
+            *ngIf="isEditMode"
+            type="text"
+            [(ngModel)]="updateRequest.phone"
+            (ngModelChange)="clearFieldError('phone')"
+            placeholder="Enter phone number"
+            [class.input-error]="isPhoneInvalid()"
+          />
+
+          <span class="error-msg" *ngIf="isPhoneInvalid()">
+            {{ getFieldError('phone') }}
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label>
+            User Type
+            <span class="required">*</span>
+          </label>
+
+          <select
+            *ngIf="!isEditMode"
+            [(ngModel)]="createRequest.userType"
+            (ngModelChange)="clearFieldError('userType')"
+            [class.input-error]="hasFieldError('userType')"
+          >
+            <option *ngFor="let type of userTypes" [value]="type">{{ type }}</option>
+          </select>
+
+          <select
+            *ngIf="isEditMode"
+            [(ngModel)]="updateRequest.userType"
+            (ngModelChange)="clearFieldError('userType')"
+            [class.input-error]="hasFieldError('userType')"
+          >
+            <option *ngFor="let type of userTypes" [value]="type">{{ type }}</option>
+          </select>
+
+          <span class="error-msg" *ngIf="hasFieldError('userType')">
+            {{ getFieldError('userType') }}
+          </span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>
+          Address
+          <span class="required">*</span>
+        </label>
+
+        <textarea
+          *ngIf="!isEditMode"
+          [(ngModel)]="createRequest.address"
+          (ngModelChange)="clearFieldError('address')"
+          rows="3"
+          placeholder="Enter address"
+          [class.input-error]="isAddressInvalid()"
+        ></textarea>
+
+        <textarea
+          *ngIf="isEditMode"
+          [(ngModel)]="updateRequest.address"
+          (ngModelChange)="clearFieldError('address')"
+          rows="3"
+          placeholder="Enter address"
+          [class.input-error]="isAddressInvalid()"
+        ></textarea>
+
+        <span class="error-msg" *ngIf="isAddressInvalid()">
+          {{ getFieldError('address') }}
+        </span>
+      </div>
+
+      <div *ngIf="isEditMode" class="form-row">
+        <div class="form-group">
+          <label>Created At</label>
+          <input type="text" [value]="originalUser?.createdAt || ''" disabled />
+        </div>
+
+        <div class="form-group">
+          <label>Onboarding Status</label>
+          <input
+            type="text"
+            [value]="originalUser?.onboardingCompleted ? 'Completed' : 'Pending'"
+            disabled
+          />
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
+        <button class="btn btn-primary" (click)="save()">
+          {{ isEditMode ? 'Update User' : 'Add User' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

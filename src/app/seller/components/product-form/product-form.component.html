@@ -1,0 +1,240 @@
+<div class="dashboard-layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <h2>🌿 AgriHub</h2>
+      <span>Seller Dashboard</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a routerLink="/seller"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{exact: true}">
+        📊 Dashboard
+      </a>
+      <a routerLink="/seller/users" routerLinkActive="active">
+        👤 Users
+      </a>
+      <a routerLink="/seller/products" routerLinkActive="active">
+        🛒 My Products
+      </a>
+      <a routerLink="/seller/orders" routerLinkActive="active">
+        📦 My Orders
+      </a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="user-avatar">T</div>
+      <div>
+        <strong>Mariem Jlassi</strong>
+        <p>📍 Bizerte</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="seller-content">
+
+    <div class="page-header">
+      <div>
+        <h1>{{ isEditMode ? '✏️ Edit Product' : '➕ Add New Product' }}</h1>
+        <p>{{ isEditMode ? 'Update your product details' : 'Fill in the details to list a new product' }}</p>
+      </div>
+      <button class="btn btn-secondary" (click)="cancel()">
+        ← Back to Products
+      </button>
+    </div>
+
+    <!-- GLOBAL MESSAGE -->
+    <div *ngIf="message" [class]="'alert alert-' + messageType">
+      {{ message }}
+    </div>
+
+    <!-- LOADING -->
+    <div *ngIf="loading" class="loading">
+      <span>⏳ Loading product...</span>
+    </div>
+
+    <!-- FORM -->
+    <div *ngIf="!loading" class="form-card">
+
+      <!-- Product Name -->
+      <div class="form-group">
+        <label>
+          Product Name
+          <span class="required">*</span>
+        </label>
+        <input
+          type="text"
+          [(ngModel)]="product.name"
+          placeholder="ex: Miel de Thym"
+          [class.input-valid]="product.name && product.name.trim() !== ''"
+          [class.input-error]="isNameInvalid()"
+        />
+        <span class="error-msg" *ngIf="isNameInvalid()">
+          ⚠️ Product name is required
+        </span>
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label>Description</label>
+        <textarea
+          [(ngModel)]="product.description"
+          placeholder="Describe your product (origin, quality, etc.)"
+          rows="3">
+        </textarea>
+        <span class="hint">Optional — helps buyers know more about your product</span>
+      </div>
+
+      <!-- Price + Unit -->
+      <div class="form-row">
+
+        <div class="form-group">
+          <label>
+            Price (DT)
+            <span class="required">*</span>
+          </label>
+          <input
+            type="number"
+            [(ngModel)]="product.price"
+            placeholder="0.00"
+            min="0.1"
+            step="0.5"
+            [class.input-valid]="product.price && product.price > 0"
+            [class.input-error]="isPriceInvalid()"
+          />
+          <span class="error-msg" *ngIf="isPriceInvalid()">
+            ⚠️ Price must be greater than 0
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label>
+            Unit
+            <span class="required">*</span>
+          </label>
+          <select
+            [(ngModel)]="product.unit"
+            [class.input-valid]="product.unit && product.unit !== ''"
+            [class.input-error]="isUnitInvalid()">
+            <option value="">— Select unit —</option>
+            <option value="kg">kg</option>
+            <option value="litre">litre</option>
+            <option value="pot">pot</option>
+            <option value="piece">piece</option>
+            <option value="boite">boite</option>
+            <option value="bouquet">bouquet</option>
+          </select>
+          <span class="error-msg" *ngIf="isUnitInvalid()">
+            ⚠️ Please select a unit
+          </span>
+        </div>
+
+      </div>
+
+      <!-- Stock + Category -->
+      <div class="form-row">
+
+        <div class="form-group">
+          <label>
+            Stock Quantity
+            <span class="required">*</span>
+          </label>
+          <input
+            type="number"
+            [(ngModel)]="product.stockQuantity"
+            placeholder="0"
+            min="0"
+            [class.input-valid]="product.stockQuantity >= 0"
+            [class.input-error]="isStockInvalid()"
+          />
+          <span class="error-msg" *ngIf="isStockInvalid()">
+            ⚠️ Stock cannot be negative
+          </span>
+          <span class="hint" *ngIf="!isStockInvalid()">
+            Current available quantity
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label>
+            Category
+            <span class="required">*</span>
+          </label>
+          <select
+            (change)="onCategoryChange($event)"
+            [class.input-valid]="product.category?.id && product.category?.id !== 0"
+            [class.input-error]="isCategoryInvalid()">
+            <option value="0">— Select category —</option>
+            <option
+              *ngFor="let c of categories"
+              [value]="c.id"
+              [selected]="product.category?.id === c.id">
+              {{ c.name }}
+            </option>
+          </select>
+          <span class="error-msg" *ngIf="isCategoryInvalid()">
+            ⚠️ Please select a category
+          </span>
+        </div>
+
+      </div>
+
+      <!-- Status -->
+      <div class="form-group">
+        <label>Status</label>
+        <select [(ngModel)]="product.status">
+          <option value="ACTIVE">✅ Active — visible to buyers</option>
+          <option value="INACTIVE">🚫 Inactive — hidden from buyers</option>
+          <option value="OUT_OF_STOCK">📦 Out of Stock</option>
+        </select>
+      </div>
+
+      <!-- Bio + Certified -->
+      <div class="form-row checkbox-row">
+        <div class="checkbox-group" [class.checked]="product.isBio">
+          <input
+            type="checkbox"
+            id="isBio"
+            [(ngModel)]="product.isBio"
+          />
+          <label for="isBio">
+            🌿 <strong>Bio Product</strong>
+            <span>Grown without pesticides</span>
+          </label>
+        </div>
+        <div class="checkbox-group" [class.checked]="product.isCertified">
+          <input
+            type="checkbox"
+            id="isCertified"
+            [(ngModel)]="product.isCertified"
+          />
+          <label for="isCertified">
+            ✅ <strong>Certified</strong>
+            <span>Has official certification</span>
+          </label>
+        </div>
+      </div>
+<!-- Section d'upload des images (uniquement en mode édition) -->
+    <div *ngIf="isEditMode && productId" class="image-upload-section">
+      <app-product-image-upload [productId]="productId"></app-product-image-upload>
+    </div>
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button class="btn btn-secondary" (click)="cancel()">
+          Cancel
+        </button>
+        <button
+          class="btn btn-primary"
+          (click)="save()"
+          [class.btn-disabled]="submitted && !isFormValid()">
+          {{ isEditMode ? '💾 Update Product' : '➕ Add Product' }}
+        </button>
+      </div>
+
+    </div> <!-- fin form-card -->
+
+
+
+  </div> <!-- fin seller-content -->
+</div> <!-- fin dashboard-layout -->

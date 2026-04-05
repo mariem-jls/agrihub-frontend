@@ -1,0 +1,105 @@
+<div class="image-upload-section">
+
+  <div class="section-header">
+    <h3>📸 Product Images</h3>
+    <span class="image-count">{{ images.length }} / 5 images</span>
+  </div>
+
+  <!-- MESSAGE -->
+  <div *ngIf="message" [class]="'alert alert-' + messageType">
+    {{ message }}
+  </div>
+
+  <!-- UPLOADED IMAGES GRID -->
+  <div class="images-grid" *ngIf="images.length > 0">
+    <div class="image-item"
+         *ngFor="let img of images"
+         [class.primary]="img.isPrimary">
+
+      <!-- IMAGE -->
+      <div class="image-preview">
+        <img [src]="getImageUrl(img.imageUrl)"
+             [alt]="'Product image'"
+             (error)="img.imageUrl = ''"
+        />
+        <div class="image-overlay">
+          <button class="overlay-btn btn-primary-img"
+                  *ngIf="!img.isPrimary"
+                  (click)="setPrimary(img)"
+                  title="Set as primary">
+            ⭐
+          </button>
+          <button class="overlay-btn btn-delete-img"
+                  (click)="deleteImage(img.id!)"
+                  title="Delete">
+            🗑️
+          </button>
+        </div>
+      </div>
+
+      <!-- PRIMARY BADGE -->
+      <div class="primary-badge" *ngIf="img.isPrimary">
+        ⭐ Primary
+      </div>
+
+    </div>
+
+    <!-- ADD MORE SLOT -->
+    <div class="add-more-slot"
+         *ngIf="images.length < 5"
+         (click)="fileInput.click()">
+      <span>+</span>
+      <p>Add more</p>
+    </div>
+
+  </div>
+
+  <!-- DROP ZONE — shown when no images or as main upload -->
+  <div
+    class="drop-zone"
+    *ngIf="images.length === 0"
+    [class.drag-over]="dragOver"
+    [class.uploading]="uploading"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave()"
+    (drop)="onDrop($event)"
+    (click)="fileInput.click()">
+
+    <div *ngIf="!uploading">
+      <div class="drop-icon">🖼️</div>
+      <h4>Drag & drop your image here</h4>
+      <p>or <span class="browse-link">browse files</span></p>
+      <p class="drop-hint">JPG, PNG, WEBP — max 5MB</p>
+    </div>
+
+    <div *ngIf="uploading" class="uploading-state">
+      <div class="spinner"></div>
+      <p>Uploading...</p>
+    </div>
+
+  </div>
+
+  <!-- Upload button when images exist -->
+  <button
+    class="btn-upload"
+    *ngIf="images.length > 0 && images.length < 5 && !uploading"
+    (click)="fileInput.click()">
+    <span>📁</span> Upload New Image
+  </button>
+
+  <!-- Uploading indicator -->
+  <div class="upload-progress" *ngIf="uploading && images.length > 0">
+    <div class="spinner-small"></div>
+    <span>Uploading...</span>
+  </div>
+
+  <!-- Hidden file input -->
+  <input
+    #fileInput
+    type="file"
+    accept="image/*"
+    style="display: none"
+    (change)="onFileSelected($event)"
+  />
+
+</div>
