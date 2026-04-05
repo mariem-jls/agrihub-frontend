@@ -1,0 +1,135 @@
+  <!-- MAIN -->
+  <div class="seller-content">
+
+    <div class="page-header">
+      <h1>My Orders</h1>
+      <p>{{ orders.length }} orders received</p>
+    </div>
+
+    <div *ngIf="message" [class]="'alert alert-' + messageType">
+      {{ message }}
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+      <button [class.active]="activeTab === 'active'"
+              (click)="setTab('active')">
+        Active
+        <span class="tab-count">{{ activeOrders.length }}</span>
+      </button>
+      <button [class.active]="activeTab === 'archive'"
+              (click)="setTab('archive')">
+        Archive
+        <span class="tab-count">{{ archiveOrders.length }}</span>
+      </button>
+    </div>
+
+    <!-- PILLS -->
+    <div class="pills">
+      <button *ngFor="let f of currentFilters"
+              [class.active]="selectedFilter === f"
+              (click)="setFilter(f)">
+        {{ f }}
+        <span *ngIf="f !== 'ALL'">
+          {{ filterByStatus(f).length }}
+        </span>
+      </button>
+    </div>
+
+    <!-- LOADING -->
+    <div *ngIf="loading" class="loading">⏳ Loading orders...</div>
+
+    <!-- EMPTY -->
+    <div *ngIf="!loading && currentTabOrders.length === 0" class="empty-state">
+      <div class="empty-icon">📭</div>
+      <h3>No orders found</h3>
+      <p>No orders with this status yet</p>
+    </div>
+
+    <!-- ORDERS ACCORDION -->
+    <div class="orders-list" *ngIf="!loading && currentTabOrders.length > 0">
+
+      <div *ngFor="let order of currentTabOrders"
+           class="order-card"
+           [class.expanded]="expandedOrderId === order.id">
+
+        <!-- CARD HEADER — toujours visible -->
+        <div class="card-header" (click)="toggleOrder(order.id!)">
+          <div class="card-left">
+            <span class="order-number">{{ order.orderNumber }}</span>
+            <span class="order-date">{{ order.createdAt | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="card-right">
+            <span [class]="'status-badge ' + order.status?.toLowerCase()">
+              {{ order.status }}
+            </span>
+            <span class="order-total">{{ order.totalAmount }} DT</span>
+            <span class="chevron">
+              {{ expandedOrderId === order.id ? '▲' : '▼' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- CARD BODY — visible si expanded -->
+        <div class="card-body" *ngIf="expandedOrderId === order.id">
+
+          <!-- ITEMS -->
+          <div class="section-label">ITEMS ORDERED</div>
+          <div class="items-list">
+            <div *ngFor="let item of order.items" class="order-item">
+              <div class="item-img">
+                <img *ngIf="item.productImageUrl" [src]="item.productImageUrl"
+                     [alt]="item.productName" />
+                <div *ngIf="!item.productImageUrl" class="img-placeholder">🌿</div>
+              </div>
+              <span class="item-name">{{ item.productName }}</span>
+              <span class="item-qty">x{{ item.quantity }}</span>
+              <span class="item-price">{{ item.subtotal }} DT</span>
+            </div>
+          </div>
+
+          <!-- META GRID -->
+          <div class="meta-grid">
+            <div class="meta-box">
+              <span class="meta-label">Delivery address</span>
+              <span class="meta-value">{{ order.deliveryAddress || '—' }}</span>
+            </div>
+            <div class="meta-box">
+              <span class="meta-label">Payment</span>
+              <span class="meta-value">
+                {{ order.payment?.method === 'CASH_ON_DELIVERY' ? 'Cash on delivery' :
+                   order.payment?.method === 'STRIPE' ? 'Stripe' : '—' }}
+              </span>
+            </div>
+            <div class="meta-box" *ngIf="order.trackingNumber">
+              <span class="meta-label">Tracking</span>
+              <span class="meta-value">
+                {{ order.trackingNumber }}
+                <span *ngIf="order.carrierName"> — {{ order.carrierName }}</span>
+              </span>
+            </div>
+            <div class="meta-box" *ngIf="order.cancellationReason">
+              <span class="meta-label">Cancellation reason</span>
+              <span class="meta-value">{{ order.cancellationReason }}</span>
+            </div>
+          </div>
+
+          <!-- ACTIONS -->
+          <div class="card-actions"
+               *ngIf="order.status !== 'DELIVERED' && order.status !== 'CANCELLED'">
+            <button class="btn-advance"
+                    *ngIf="getNextStatus(order.status!)"
+                    (click)="advanceStatus(order)">
+              ➡️ Mark as {{ getNextStatus(order.status!) }}
+            </button>
+            <button class="btn-cancel"
+                    *ngIf="order.status === 'PENDING' || order.status === 'CONFIRMED'"
+                    (click)="cancelOrder(order)">
+              ✕ Cancel order
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>

@@ -1,0 +1,128 @@
+<div>
+  <div class="page-header">
+    <div>
+      <h1>Archives</h1>
+      <p>Événements archivés</p>
+    </div>
+  </div>
+
+  <div *ngIf="loadError" class="alert">{{ loadError }}</div>
+  <div *ngIf="isLoading" class="loading-state">Chargement…</div>
+
+  <div *ngIf="!isLoading">
+
+    <!-- Barre recherche -->
+    <div class="search-bar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" [(ngModel)]="searchTerm" placeholder="Rechercher un événement..." />
+    </div>
+
+    <!-- Filtres -->
+    <div class="toolbar">
+      <select class="filter-select" [(ngModel)]="filterCategorie">
+        <option value="">Toutes catégories</option>
+        <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+      </select>
+
+      <select class="filter-select" [(ngModel)]="filterStatut">
+        <option value="">Tous statuts</option>
+        <option value="DISPONIBLE">Disponible</option>
+        <option value="COMPLET">Complet</option>
+      </select>
+    </div>
+
+    <!-- Tableau événements -->
+    <div class="table-wrap">
+      <table class="data-table" *ngIf="filteredEvents.length > 0">
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Date</th>
+            <th>Adresse</th>
+            <th>Catégorie</th>
+            <th>Places</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let e of filteredEvents">
+            <td class="cell-name">{{ e.nom }}</td>
+            <td>{{ formatDate(e.date) }}</td>
+            <td>{{ e.adresse }}</td>
+            <td>{{ e.categorie }}</td>
+            <td>{{ e.nbrPlaces }}</td>
+            <td>
+              <span class="statut-badge"
+                [ngClass]="e.statut === 'COMPLET' ? 'badge-complet-inline' : ''">
+                {{ e.statut ?? '—' }}
+              </span>
+            </td>
+            <td>
+              <button type="button" class="btn btn-gold" (click)="voirParticipants(e)">
+                👥 Voir participants
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p *ngIf="filteredEvents.length === 0" class="empty-hint">Aucun événement trouvé.</p>
+    </div>
+
+    <!-- Panel participants -->
+    <div *ngIf="selectedEvent" style="margin-top: 32px;">
+      <div class="panel-header">
+        <h2>Participants — {{ selectedEvent.nom }}</h2>
+        <span *ngIf="selectedEvent.statut === 'COMPLET'" class="badge-complet">COMPLET</span>
+      </div>
+
+      <div *ngIf="participantsError" class="alert">{{ participantsError }}</div>
+      <div *ngIf="isLoadingParticipants" class="loading-state">Chargement…</div>
+
+      <div *ngIf="!isLoadingParticipants">
+
+        <!-- Filtres statut participants -->
+        <div class="statut-filters">
+          <button class="statut-btn" *ngFor="let s of participantStatuts"
+            [class.active]="filterParticipantStatut === s"
+            (click)="filterParticipantStatut = s">
+            {{ s }} {{ countParticipantStatut(s) }}
+          </button>
+        </div>
+
+        <div class="table-wrap">
+          <table class="data-table" *ngIf="filteredParticipants.length > 0">
+            <thead>
+              <tr>
+                <th>Nom</th>
+                <th>Email</th>
+                <th>Téléphone</th>
+                <th>Places</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of filteredParticipants">
+                <td class="cell-name">{{ p.nomComplet }}</td>
+                <td>{{ p.email }}</td>
+                <td>{{ p.telephone }}</td>
+                <td>{{ p.nombrePlaces }}</td>
+                <td>
+                  <span class="statut-badge" [ngClass]="{
+                    'badge-confirme': p.statut === 'CONFIRMEE',
+                    'badge-refuse': p.statut === 'REFUSEE',
+                    'badge-attente': p.statut === 'EN_ATTENTE',
+                    'badge-liste': p.statut === 'LISTE_ATTENTE'
+                  }">{{ p.statut ?? '—' }}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p *ngIf="filteredParticipants.length === 0" class="empty-hint">Aucun participant.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

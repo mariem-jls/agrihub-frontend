@@ -1,0 +1,159 @@
+<nav class="navbar">
+  <div class="navbar-brand">🌿 AgriHub</div>
+  <button class="back-btn" (click)="goBack()">← Continue Shopping</button>
+</nav>
+
+<div class="checkout-container">
+
+  <!-- CONFIRMATION PAGE -->
+  <div class="confirmation" *ngIf="confirmed">
+    <div class="confirm-icon">✅</div>
+    <h2>Order Placed!</h2>
+    <p>Thank you for your order 🌿</p>
+    <div class="order-numbers">
+      <div *ngFor="let num of confirmedOrderNumbers"
+           class="order-number">
+        {{ num }}
+      </div>
+    </div>
+    <p class="estimated">
+      📦 Estimated delivery: 3-5 business days
+    </p>
+    <button class="btn-primary" (click)="goBack()">
+      🛒 Continue Shopping
+    </button>
+  </div>
+
+  <!-- CHECKOUT FORM -->
+  <div class="checkout-layout" *ngIf="!confirmed">
+
+    <!-- LEFT — Cart Summary -->
+    <div class="cart-summary">
+      <h2>Your Cart</h2>
+
+      <div *ngIf="cart.length === 0" class="empty-cart">
+        🛒 Your cart is empty
+        <button class="btn-primary" (click)="goBack()">
+          Go Shopping
+        </button>
+      </div>
+
+      <div *ngIf="cart.length > 0">
+        <div class="cart-item" *ngFor="let item of cart; let i = index">
+          <div class="item-emoji">
+            {{ item.product.isBio ? '🌿' : '🥬' }}
+          </div>
+          <div class="item-info">
+            <strong>{{ item.product.name }}</strong>
+            <span>{{ item.product.price }} DT × {{ item.qty }}</span>
+          </div>
+          <div class="item-subtotal">
+            {{ (item.product.price * item.qty).toFixed(2) }} DT
+          </div>
+          <button class="remove-btn" (click)="removeItem(i)">✕</button>
+        </div>
+
+        <div class="cart-total">
+          <span>Total</span>
+          <strong>{{ total }} DT</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT — Order Details -->
+    <div class="order-details" *ngIf="cart.length > 0">
+      <h2>Order Details</h2>
+
+      <!-- ALERT -->
+      <div *ngIf="message" [class]="'alert alert-' + messageType">
+        {{ message }}
+      </div>
+
+      <!-- Address -->
+      <div class="form-group">
+        <label>
+          Delivery Address
+          <span class="required">*</span>
+        </label>
+        <textarea
+          [(ngModel)]="deliveryAddress"
+          placeholder="Enter your full delivery address..."
+          rows="3"
+          [class.input-error]="isAddressInvalid()">
+        </textarea>
+        <span class="error-msg" *ngIf="isAddressInvalid()">
+          ⚠️ Delivery address is required
+        </span>
+      </div>
+
+      <!-- Payment Method -->
+      <div class="form-group">
+        <label>Payment Method</label>
+        <div class="payment-options">
+
+          <label class="payment-option"
+                 [class.selected]="paymentMethod === 'CASH_ON_DELIVERY'">
+            <input type="radio" name="payment"
+                   value="CASH_ON_DELIVERY"
+                   [(ngModel)]="paymentMethod"/>
+            <div class="payment-icon">💵</div>
+            <div>
+              <strong>Cash on Delivery</strong>
+              <span>Pay when you receive</span>
+            </div>
+          </label>
+
+          <label class="payment-option"
+                 [class.selected]="paymentMethod === 'FLOUCI'">
+            <input type="radio" name="payment"
+                   value="FLOUCI"
+                   [(ngModel)]="paymentMethod"/>
+            <div class="payment-icon">📱</div>
+            <div>
+              <strong>Flouci</strong>
+              <span>Pay online</span>
+            </div>
+          </label>
+
+          <label class="payment-option"
+                 [class.selected]="paymentMethod === 'KONNECT'">
+            <input type="radio" name="payment"
+                   value="KONNECT"
+                   [(ngModel)]="paymentMethod"/>
+            <div class="payment-icon">💳</div>
+            <div>
+              <strong>Konnect</strong>
+              <span>Pay online</span>
+            </div>
+          </label>
+
+        </div>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="order-summary">
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span>{{ total }} DT</span>
+        </div>
+        <div class="summary-row">
+          <span>Delivery</span>
+          <span class="free">Free</span>
+        </div>
+        <div class="summary-row total-row">
+          <strong>Total</strong>
+          <strong>{{ total }} DT</strong>
+        </div>
+      </div>
+
+      <!-- Place Order -->
+      <button
+        class="btn-place-order"
+        (click)="placeOrder()"
+        [disabled]="loading">
+        {{ loading ? '⏳ Processing...' : '✅ Place Order — ' + total + ' DT' }}
+      </button>
+
+    </div>
+  </div>
+</div>

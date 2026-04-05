@@ -1,0 +1,298 @@
+<div class="seller-content">
+
+  <div class="page-header">
+    <div>
+      <h1>{{ isEditMode ? "Modifier l'événement" : "Nouvel événement" }}</h1>
+      <p>{{ isEditMode ? 'Mettre à jour les informations' : "Remplir les informations de l'événement" }}</p>
+    </div>
+    <button class="btn btn-secondary" (click)="router.navigate(['/event'])">← Retour</button>
+  </div>
+
+  <div *ngIf="submitError" class="form-error-banner" role="alert">{{ submitError }}</div>
+
+  <div class="form-card">
+    <form (ngSubmit)="onSubmit()" #eventForm="ngForm">
+
+      <div *ngIf="isEditMode" class="info-box">
+        ℹ️ En mode modification, seules la date et l'adresse peuvent être modifiées. Les participants confirmés seront automatiquement notifiés.
+      </div>
+
+      <!-- Catégorie -->
+      <div class="form-group">
+        <label for="categorie">Catégorie <span class="required">*</span></label>
+        <select id="categorie" name="categorie" [(ngModel)]="newEvent.categorie"
+          (ngModelChange)="onCategorieChange()" required [disabled]="isEditMode">
+          <option value="" disabled>-- Choisir une catégorie --</option>
+          <option *ngFor="let cat of categories" [value]="cat.value">{{ cat.label }}</option>
+        </select>
+      </div>
+
+      <!-- Foire -->
+      <div *ngIf="isFoire">
+        <div class="info-box">🏪 Champs spécifiques — Foire Agricole</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre d'exposants</label>
+            <input type="number" name="nbExposants" [(ngModel)]="newEvent.nbExposants"
+              placeholder="Ex: 50" min="0" [disabled]="isEditMode" />
+          </div>
+          <div class="form-group">
+            <label>Prix d'entrée (TND)</label>
+            <input type="number" name="prixEntree" [(ngModel)]="newEvent.prixEntree"
+              placeholder="0 = Gratuit" min="0" step="0.5" [disabled]="isEditMode" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Types de produits exposés</label>
+          <input type="text" name="typeProduits" [(ngModel)]="newEvent.typeProduits"
+            placeholder="Ex: Céréales, Fruits, Légumes..." [disabled]="isEditMode" />
+        </div>
+      </div>
+
+      <!-- Formation -->
+      <div *ngIf="isFormation">
+        <div class="info-box">🎓 Champs spécifiques — Formation</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Formateur / Intervenant</label>
+            <input type="text" name="formateur" [(ngModel)]="newEvent.formateur"
+              placeholder="Nom du formateur" [disabled]="isEditMode" />
+          </div>
+          <div class="form-group">
+            <label>Durée (heures)</label>
+            <input type="number" name="dureeHeures" [(ngModel)]="newEvent.dureeHeures"
+              placeholder="Ex: 8" min="1" [disabled]="isEditMode" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Niveau requis</label>
+            <select name="niveauRequis" [(ngModel)]="newEvent.niveauRequis" [disabled]="isEditMode">
+              <option value="">-- Choisir un niveau --</option>
+              <option *ngFor="let n of niveaux" [value]="n">{{ n }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <div class="checkbox-inline" style="margin-top: 22px;">
+              <input type="checkbox" name="certification" [(ngModel)]="newEvent.certification" id="certification" [disabled]="isEditMode" />
+              <label for="certification">Certification délivrée</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conférence -->
+      <div *ngIf="isConference">
+        <div class="info-box">🎤 Champs spécifiques — Conférence</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Intervenant principal</label>
+            <input type="text" name="intervenant" [(ngModel)]="newEvent.intervenant"
+              placeholder="Nom de l'intervenant" [disabled]="isEditMode" />
+          </div>
+          <div class="form-group">
+            <label>Thème principal</label>
+            <input type="text" name="themePrincipal" [(ngModel)]="newEvent.themePrincipal"
+              placeholder="Ex: Agriculture durable en Tunisie" [disabled]="isEditMode" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Investissement -->
+      <div *ngIf="isInvestissement">
+        <div class="info-box">💰 Champs spécifiques — Investissement</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Montant minimum (TND)</label>
+            <input type="number" name="montantMin" [(ngModel)]="newEvent.montantMin"
+              placeholder="Ex: 5000" min="0" [disabled]="isEditMode" />
+          </div>
+          <div class="form-group">
+            <label>Secteur ciblé</label>
+            <input type="text" name="secteurCible" [(ngModel)]="newEvent.secteurCible"
+              placeholder="Ex: Agriculture bio, Élevage..." [disabled]="isEditMode" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Recyclage -->
+      <div *ngIf="isRecyclage">
+        <div class="info-box">♻️ Champs spécifiques — Recyclage</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Types de déchets acceptés</label>
+            <input type="text" name="typeDechets" [(ngModel)]="newEvent.typeDechets"
+              placeholder="Ex: Plastiques agricoles..." [disabled]="isEditMode" />
+          </div>
+          <div class="form-group">
+            <label>Capacité de traitement</label>
+            <input type="text" name="capaciteTraitement" [(ngModel)]="newEvent.capaciteTraitement"
+              placeholder="Ex: 500 kg/jour" [disabled]="isEditMode" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Partenaires recycleurs</label>
+          <input type="text" name="partenaires" [(ngModel)]="newEvent.partenaires"
+            placeholder="Ex: EcoVert, RecyclAgri..." [disabled]="isEditMode" />
+        </div>
+      </div>
+
+      <!-- Atelier -->
+      <div *ngIf="isAtelier">
+        <div class="info-box">🛠️ Champs spécifiques — Atelier Pratique</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Niveau</label>
+            <select name="niveauAtelier" [(ngModel)]="newEvent.niveauAtelier" [disabled]="isEditMode">
+              <option value="">-- Choisir un niveau --</option>
+              <option *ngFor="let n of niveaux" [value]="n">{{ n }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Prérequis</label>
+            <input type="text" name="prerequis" [(ngModel)]="newEvent.prerequis"
+              placeholder="Ex: Notions de base en agriculture" [disabled]="isEditMode" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Matériel nécessaire</label>
+          <input type="text" name="materielNecessaire" [(ngModel)]="newEvent.materielNecessaire"
+            placeholder="Ex: Gants, Outils de jardinage..." [disabled]="isEditMode" />
+        </div>
+      </div>
+
+      <!-- Marché -->
+      <div *ngIf="isMarche">
+        <div class="info-box">🌿 Champs spécifiques — Marché Local</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Horaires d'ouverture</label>
+            <input type="text" name="horairesOuverture" [(ngModel)]="newEvent.horairesOuverture"
+              placeholder="Ex: 8h00 - 14h00" [disabled]="isEditMode" />
+          </div>
+          <div class="form-group">
+            <label>Nombre de stands</label>
+            <input type="number" name="nbStands" [(ngModel)]="newEvent.nbStands"
+              placeholder="Ex: 30" min="1" [disabled]="isEditMode" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Innovation -->
+      <div *ngIf="isInnovation">
+        <div class="info-box">🚀 Champs spécifiques — Innovation Agro</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Technologie présentée</label>
+            <input type="text" name="technologie" [(ngModel)]="newEvent.technologie"
+              placeholder="Ex: Drones agricoles..." [disabled]="isEditMode" />
+          </div>
+          <div class="form-group">
+            <label>Entreprise / Startup</label>
+            <input type="text" name="entreprise" [(ngModel)]="newEvent.entreprise"
+              placeholder="Nom de l'entreprise" [disabled]="isEditMode" />
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="checkbox-inline">
+            <input type="checkbox" name="demoDisponible" [(ngModel)]="newEvent.demoDisponible"
+              id="demoDisponible" [disabled]="isEditMode" />
+            <label for="demoDisponible">Démonstration disponible</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Nom -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="nom">Nom de l'événement <span class="required">*</span></label>
+          <input id="nom" type="text" name="nom" [(ngModel)]="newEvent.nom"
+            placeholder="Ex: Foire Agricole de Tunis" required [disabled]="isEditMode" />
+        </div>
+      </div>
+
+      <!-- Date + Places -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="date">Date et heure <span class="required">*</span></label>
+          <input id="date" type="datetime-local" name="date" [(ngModel)]="newEvent.date" required />
+        </div>
+        <div class="form-group">
+          <label for="nbrPlaces">Nombre de places <span class="required">*</span></label>
+          <input id="nbrPlaces" type="number" name="nbrPlaces" [(ngModel)]="newEvent.nbrPlaces"
+            placeholder="Ex: 100" min="1" required [disabled]="isEditMode" />
+        </div>
+      </div>
+
+      <!-- Adresse -->
+      <div class="form-group">
+        <label for="adresse">Adresse <span class="required">*</span></label>
+        <input id="adresse" type="text" name="adresse" [(ngModel)]="newEvent.adresse"
+          placeholder="Adresse de l'événement" required />
+      </div>
+
+      <!-- Map -->
+      <div class="form-group map-field">
+        <label>Emplacement sur la carte 📍</label>
+        <p class="map-hint">Carte centrée sur Tunis — cliquez pour placer le marqueur.</p>
+        
+        <div id="eventLocationMap" class="event-map"></div>
+      </div>
+
+     <!-- Description -->
+<div class="form-group">
+  <div class="d-flex-between mb-2">
+    <label for="description">Description <span class="required">*</span></label>
+    <button type="button" class="btn-generate"
+            (click)="genererDescription()"
+            [disabled]="isGenerating">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+      </svg>
+      {{ isGenerating ? 'Génération...' : 'Générer avec IA' }}
+    </button>
+  </div>
+  <span *ngIf="generateError" style="color:#ef4444; font-size:12px; display:block; margin-bottom:6px;">
+    {{ generateError }}
+  </span>
+  <textarea id="description" name="description"
+            [(ngModel)]="newEvent.description"
+            placeholder="Décrivez l'événement ou cliquez sur Générer avec IA..."
+            rows="4" required [disabled]="isEditMode"></textarea>
+</div>
+
+      <div class="upload-section">
+  <label>Image de l'événement</label>
+
+  <!-- Image actuelle si édition et pas de nouvelle sélection -->
+  <div *ngIf="isEditMode && existingImageUrl && !previewUrl" class="preview">
+    <p class="preview-label">Image actuelle</p>
+    <img [src]="existingImageUrl" alt="image actuelle" />
+  </div>
+
+  <!-- Upload toujours disponible -->
+  <div class="drop-zone" (click)="fileInput.click()">
+    <div style="font-size: 32px;">📷</div>
+    <p>{{ isEditMode ? 'Cliquer pour changer l\'image' : 'Cliquer pour choisir une image' }}</p>
+    <p *ngIf="selectedFileName" style="color:#2c5f2d; font-weight:500;">✅ {{ selectedFileName }}</p>
+    <input #fileInput type="file" accept="image/*" style="display:none"
+           (change)="onFileSelected($event)" />
+  </div>
+
+  <div *ngIf="previewUrl" class="preview">
+    <p class="preview-label">Aperçu</p>
+    <img [src]="previewUrl" alt="aperçu" />
+  </div>
+</div>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="resetForm()">Réinitialiser</button>
+        <button type="submit" class="btn btn-primary" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Enregistrement...' : (isEditMode ? 'Mettre à jour' : "Créer l'événement") }}
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

@@ -1,0 +1,33 @@
+<article class="event-card card" [routerLink]="['/event/detail', event.id]">
+  <div class="media" *ngIf="event.image; else placeholder">
+    <img
+      [src]="'http://localhost:8089/AgriHub/api/events/image/' + event.image + '?v=' + event.id"
+      class="event-image"
+      [alt]="event.nom || 'Événement'"
+      loading="lazy"
+    />
+  </div>
+
+  <ng-template #placeholder>
+    <div class="media placeholder" aria-hidden="true">
+      <span class="placeholder-icon">🌿</span>
+    </div>
+  </ng-template>
+
+  <div class="body">
+    <h3 class="name">{{ event.nom }}</h3>
+
+    <div class="meta muted">
+      <span>📅 {{ event.date | date:'medium' }}</span>
+      <span class="dot" aria-hidden="true">•</span>
+      <span>📍 {{ event.adresse }}</span>
+    </div>
+
+    <p class="desc" *ngIf="event.description">{{ event.description }}</p>
+
+    <div class="footer" (click)="$event.stopPropagation()">
+      <a class="btn btn-ghost" [routerLink]="['/event/edit', event.id]">Modifier</a>
+      <button class="btn btn-danger" type="button" (click)="requestDelete(); $event.stopPropagation()">Supprimer</button>
+    </div>
+  </div>
+</article>

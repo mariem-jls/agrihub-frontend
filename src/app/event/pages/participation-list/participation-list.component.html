@@ -1,0 +1,164 @@
+<div>
+  <div class="page-header">
+    <div>
+      <h1>Participations</h1>
+      <p>Gestion des inscriptions aux événements</p>
+    </div>
+  </div>
+
+  <div *ngIf="actionError" class="alert">{{ actionError }}</div>
+
+  <!-- Tabs Active / Archive -->
+  <div class="tabs-bar">
+    <button class="tab-btn" [class.active]="activeTab === 'active'" (click)="activeTab = 'active'">
+      Active
+      <span class="tab-count">{{ participations.length - countByStatut('REFUSEE') }}</span>
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'archive'" (click)="activeTab = 'archive'">
+      Archive
+      <span class="tab-count tab-count-grey">{{ countByStatut('REFUSEE') }}</span>
+    </button>
+  </div>
+
+  <!-- Filtres statut -->
+  <div class="statut-filters">
+    <button class="statut-btn" *ngFor="let s of statuts"
+      [class.active]="filterStatut === s"
+      (click)="filterStatut = s">
+      {{ s === 'ALL' ? 'ALL' : s }} {{ countByStatut(s) }}
+    </button>
+  </div>
+
+  <div class="search-bar" style="margin-bottom: 20px;">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+  </svg>
+  <input type="text" [(ngModel)]="searchEvent"
+         placeholder="Rechercher par événement, nom, email..." />
+</div>
+
+  <div *ngIf="isLoading" class="loading-state">Chargement…</div>
+
+  <div class="table-wrap" *ngIf="!isLoading">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Événement</th>
+          <th>Nom</th>
+          <th>Email</th>
+          <th>Téléphone</th>
+          <th>Places</th>
+          <th>Statut</th>
+          <th>Date</th>
+          <th>Cause</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of filteredRows">
+          <td>
+            <span class="event-cell">{{ eventName(p) }}</span>
+            <span *ngIf="eventStatut(p) === 'COMPLET'" class="badge-complet">COMPLET</span>
+          </td>
+          <td>{{ p.nomComplet }}</td>
+          <td>{{ p.email }}</td>
+          <td>{{ p.telephone }}</td>
+          <td>{{ p.nombrePlaces }}</td>
+          <td>
+            <span class="statut-badge" [ngClass]="statutClass(p.statut)">{{ statutLabel(p.statut) }}</span>
+          </td>
+          <td>{{ formatDate(p.dateInscription) }}</td>
+          <td>{{ p.statut === 'REFUSEE' ? (p.causeDecision ?? '—') : '—' }}</td>
+          <td class="actions-cell">
+  <ng-container *ngIf="isConfirmedOnly(p)">
+    <span class="actions-placeholder">—</span>
+  </ng-container>
+  <ng-container *ngIf="canConfirmOrRefuse(p)">
+    <button type="button" class="btn-action btn-confirm-action"
+      title="Confirmer" [disabled]="busyId === p.id" (click)="openConfirm(p)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+      Confirmer
+    </button>
+    <button type="button" class="btn-action btn-refuse-action"
+      title="Refuser" [disabled]="busyId === p.id" (click)="openRefuse(p)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+      Refuser
+    </button>
+  </ng-container>
+  <button *ngIf="canDeleteOnly(p)" type="button" class="btn-action btn-delete-action"
+    title="Supprimer" [disabled]="busyId === p.id" (click)="supprimer(p)">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
+      <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+    </svg>
+    Supprimer
+  </button>
+</td>
+        </tr>
+      </tbody>
+    </table>
+    <p *ngIf="filteredRows.length === 0" class="empty-hint">Aucune participation à afficher.</p>
+  </div>
+</div>
+
+<!-- Modal Confirmer -->
+<div class="modal-backdrop" *ngIf="confirmModalOpen">
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <h3>Confirmer la participation</h3>
+      <button type="button" class="modal-close" (click)="cancelConfirm()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-line"><strong>Participant</strong> : {{ selected?.nomComplet }}</p>
+      <p class="modal-line"><strong>Événement</strong> : {{ selected ? eventName(selected) : '—' }}</p>
+      <label class="modal-label" for="confirmMessage">Message (optionnel)</label>
+      <textarea id="confirmMessage" class="modal-textarea" [(ngModel)]="confirmMessage"
+        rows="4" placeholder="Votre message…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn-modal btn-cancel" (click)="cancelConfirm()">Annuler</button>
+      <button type="button" class="btn-modal btn-confirm"
+  [disabled]="selected?.id == null || busyId === selected?.id"
+  (click)="submitConfirm()">Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Refuser -->
+<div class="modal-backdrop" *ngIf="refuseModalOpen">
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <h3>Refuser la participation</h3>
+      <button type="button" class="modal-close" (click)="cancelRefuse()">✕</button>
+    </div>-
+    <div class="modal-body">
+      <p class="modal-line"><strong>Participant</strong> : {{ selected?.nomComplet }}</p>
+      <p class="modal-line"><strong>Événement</strong> : {{ selected ? eventName(selected) : '—' }}</p>
+      <p class="modal-label">Raison <span class="required">*</span></p>
+      <label class="radio-line">
+        <input type="radio" name="refuseReason" [(ngModel)]="refuseReason" [value]="'CONTACT'" />
+        Informations de contact incorrectes
+      </label>
+      <label class="radio-line">
+        <input type="radio" name="refuseReason" [(ngModel)]="refuseReason" [value]="'DOUBLE'" />
+        Inscription en double détectée
+      </label>
+      <label class="radio-line">
+        <input type="radio" name="refuseReason" [(ngModel)]="refuseReason" [value]="'AUTRE'" />
+        Autre
+      </label>
+      <textarea *ngIf="refuseReason === 'AUTRE'" class="modal-textarea"
+        [(ngModel)]="refuseOtherText" rows="3" placeholder="Décrivez la raison…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn-modal btn-cancel" (click)="cancelRefuse()">Annuler</button>
+      <button type="button" class="btn-modal btn-refuse"
+  [disabled]="selected?.id == null || busyId === selected?.id || !refuseCause"
+  (click)="submitRefuse()">Refuser</button>
+    </div>
+  </div>
+</div>
