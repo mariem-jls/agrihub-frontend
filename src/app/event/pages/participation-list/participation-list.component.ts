@@ -64,6 +64,7 @@ export class ParticipationListComponent implements OnInit {
           next: (rows) => {
             this.participations = rows;
             this.isLoading = false;
+            console.log(rows);
           },
           error: () => {
             this.actionError = 'Impossible de charger les participations.';
@@ -99,7 +100,6 @@ get filteredRows() {
 
 
 
-  
 
   countByStatut(s: string) {
     const mapped = s === 'LISTE_ATTENTE' ? 'EN_ATTENTE_LISTE' : s;

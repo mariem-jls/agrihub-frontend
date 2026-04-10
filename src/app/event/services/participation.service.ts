@@ -36,6 +36,13 @@ export interface Participation {
   // INNOVATION_AGRO
   domaineExpertise?: string;
   interetDemo?: boolean;
+  user: {
+    id: number;
+    username: string;
+    email: string;
+    fullName: string;
+    phone?: string;
+  };
 }
 
 @Injectable({

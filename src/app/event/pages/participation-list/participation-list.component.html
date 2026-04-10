@@ -60,10 +60,10 @@
             <span class="event-cell">{{ eventName(p) }}</span>
             <span *ngIf="eventStatut(p) === 'COMPLET'" class="badge-complet">COMPLET</span>
           </td>
-          <td>{{ p.nomComplet }}</td>
-          <td>{{ p.email }}</td>
-          <td>{{ p.telephone }}</td>
-          <td>{{ p.nombrePlaces }}</td>
+          <td>{{ p.user.fullName }}</td>
+          <td>{{ p.user.email }}</td>
+          <td>{{ p.user.phone }}</td>
+          <td>1</td>
           <td>
             <span class="statut-badge" [ngClass]="statutClass(p.statut)">{{ statutLabel(p.statut) }}</span>
           </td>
