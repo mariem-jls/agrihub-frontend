@@ -13,6 +13,8 @@ import { ProductListComponent } from './components/product-list/product-list.com
 import { ProductFormComponent } from './components/product-form/product-form.component';
 import { OrderListComponent } from './components/order-list/order-list.component';
 import { ProductImageUploadComponent } from './components/product-image-upload/product-image-upload.component';
+import { DemandesComponent } from './components/demandes/demandes.component';
+import { RessourcesComponent } from './components/ressources/ressources.component';
 import { FundingProjectComponent } from './components/funding-project/funding-project.component';
 import { ContributionsComponent } from './components/contributions/contributions.component';
 import { WalletsComponent } from './components/wallets/wallets.component';
@@ -34,6 +36,9 @@ import { ReclamationsComponent } from './components/reclamations/reclamations.co
     TransactionsComponent,
     ReclamationsComponent,
 
+    ProductImageUploadComponent,
+    DemandesComponent,
+    RessourcesComponent
   ],
   imports: [
     CommonModule,
@@ -41,7 +46,7 @@ import { ReclamationsComponent } from './components/reclamations/reclamations.co
     HttpClientModule,
     SellerRoutingModule,
     RouterModule    ,
-        
+
   ]
 })
 export class SellerModule { }

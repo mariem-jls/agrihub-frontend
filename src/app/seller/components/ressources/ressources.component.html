@@ -1,0 +1,251 @@
+<div class="dashboard-layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <h2>🌿 AgriHub</h2>
+      <span>Seller Dashboard</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a routerLink="/seller" routerLinkActive="active"
+         [routerLinkActiveOptions]="{exact: true}">
+        📊 Dashboard
+      </a>
+      <a routerLink="/seller/products" routerLinkActive="active">
+        🛒 My Products
+      </a>
+      <a routerLink="/seller/orders" routerLinkActive="active">
+        📦 My Orders
+      </a>
+      <a routerLink="/seller/ressources" routerLinkActive="active">
+        🌾 My Ressources
+      </a>
+    </nav>
+
+    <div class="sidebar-user">
+      <div class="user-avatar">M</div>
+      <div>
+        <strong>Mariem Jlassi</strong>
+        <p>📍 Nabeul</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="seller-content">
+
+    <!-- HEADER -->
+    <div class="page-header">
+      <div>
+        <h1>🌾 My Ressources</h1>
+        <p>Manage your agricultural ressources</p>
+      </div>
+    </div>
+
+    <!-- LOADING -->
+    <div *ngIf="loading" class="loading">⏳ Loading ressources...</div>
+
+    <!-- EMPTY -->
+    <div *ngIf="!loading && ressources.length === 0" class="empty-state">
+      <div class="empty-icon">🌱</div>
+      <h3>No ressources yet</h3>
+      <p>You haven't added any ressource yet</p>
+    </div>
+
+    <!-- TABLE -->
+    <div *ngIf="!loading && ressources.length > 0" class="table-card">
+      <table class="product-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Ressource</th>
+            <th>Type</th>
+            <th>Prix</th>
+            <th>Adresse</th>
+            <th>Badge</th>
+            <th>Statut</th>
+            <th style="text-align:center;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of ressources">
+
+            <!-- ID -->
+            <td style="color:#9ca3af; font-size:12px;">#{{ r.id }}</td>
+
+            <!-- RESSOURCE (image + nom + desc) -->
+            <td>
+              <div class="res-cell">
+                <img class="res-img"
+                     [src]="r.images
+                       ? 'http://localhost:8089/AgriHub/ressources/images/' + r.images
+                       : 'assets/images/user.png'"
+                     onerror="this.src='assets/images/user.png'">
+                <div>
+                  <div class="res-name">{{ r.nameR }}</div>
+                  <div class="res-desc">{{ r.description }}</div>
+                </div>
+              </div>
+            </td>
+
+            <!-- TYPE -->
+            <td>
+              <span class="badge badge-type">
+                {{ r.type === 'MATERIEL' ? '🚜 Matériel' : '🏡 Terrain' }}
+              </span>
+            </td>
+
+            <!-- PRIX -->
+            <td>
+              <span class="prix-cell">
+                {{ r.prixLocation ? r.prixLocation + ' TND' : '—' }}
+              </span>
+            </td>
+
+            <!-- ADRESSE -->
+            <td style="color:#6b7280; font-size:12px;">
+              📍 {{ r.adresse || '—' }}
+            </td>
+
+            <!-- BADGE PREMIUM -->
+            <td>
+              <span *ngIf="r.badge === 'PREMIUM'" class="badge badge-premium">
+                ⭐ Premium
+              </span>
+              <span *ngIf="r.badge !== 'PREMIUM'" style="color:#d1d5db; font-size:12px;">
+                —
+              </span>
+            </td>
+
+            <!-- STATUT -->
+            <td>
+              <span [ngClass]="{
+                'badge': true,
+                'badge-disponible':   r.status === 'DISPONIBLE',
+                'badge-indisponible': r.status !== 'DISPONIBLE'
+              }">
+                {{ r.status === 'DISPONIBLE' ? '✅ Disponible' : '🔴 Indisponible' }}
+              </span>
+            </td>
+            <td style="text-align:center;">
+  <button class="action-btn btn-view"
+          (click)="voirDetails(r)"
+          title="Voir détails">👁</button>
+</td>
+
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL DÉTAILS RESSOURCE -->
+<div class="modal-overlay" *ngIf="selectedRessource"
+     style="animation:fadeIn 0.2s ease;">
+  <div class="modal-box" style="animation:slideUp 0.3s ease;">
+
+    <!-- HEADER -->
+    <div class="modal-head">
+      <div>
+        <div style="color:rgba(255,255,255,0.7); font-size:11px;
+                    text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">
+          {{ selectedRessource.type === 'MATERIEL' ? '🚜 Matériel' : '🏡 Terrain' }}
+        </div>
+        <h5>{{ selectedRessource.nameR }}</h5>
+      </div>
+      <button class="modal-close" (click)="selectedRessource = null">✕</button>
+    </div>
+
+    <!-- IMAGE -->
+    <div style="position:relative;">
+      <img [src]="selectedRessource.images
+             ? 'http://localhost:8089/AgriHub/ressources/images/' + selectedRessource.images
+             : 'assets/images/user.png'"
+           onerror="this.src='assets/images/user.png'"
+           style="width:100%; height:160px; object-fit:cover; display:block;">
+
+      <!-- Badge Premium sur image -->
+      <span *ngIf="selectedRessource.badge === 'PREMIUM'"
+            style="position:absolute; top:12px; right:12px;
+                   background:linear-gradient(135deg,#f59e0b,#d97706);
+                   color:#fff; font-size:11px; font-weight:700;
+                   padding:4px 12px; border-radius:20px;">
+        ⭐ Premium
+      </span>
+
+      <!-- Badge status sur image -->
+      <span style="position:absolute; top:12px; left:12px; font-size:11px;
+                   font-weight:700; padding:4px 12px; border-radius:20px;"
+            [style.background]="selectedRessource.status === 'DISPONIBLE'
+              ? 'rgba(34,197,94,0.9)' : 'rgba(239,68,68,0.9)'"
+            style="color:#fff;">
+        {{ selectedRessource.status === 'DISPONIBLE' ? '✅ Disponible' : '🔴 Indisponible' }}
+      </span>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- DESCRIPTION -->
+      <div style="background:#f9fafb; border-radius:12px; padding:14px; margin-bottom:16px;">
+        <div style="font-size:11px; color:#9ca3af; font-weight:600;
+                    text-transform:uppercase; margin-bottom:6px;">📋 Description</div>
+        <p style="margin:0; font-size:13px; color:#374151; line-height:1.7;">
+          {{ selectedRessource.description || 'Aucune description.' }}
+        </p>
+      </div>
+
+      <!-- TERRAIN -->
+      <ng-container *ngIf="selectedRessource.type === 'TERRAIN'">
+        <div class="info-row-modal">
+          <span>🏡 Nom</span>
+          <strong>{{ selectedRessource.nameR }}</strong>
+        </div>
+        <div class="info-row-modal">
+          <span>📍 Adresse</span>
+          <strong>{{ selectedRessource.adresse || '—' }}</strong>
+        </div>
+        <div class="info-row-modal">
+          <span>📏 Superficie</span>
+          <strong>{{ selectedRessource.superficie ? selectedRessource.superficie + ' m²' : '—' }}</strong>
+        </div>
+      </ng-container>
+
+      <!-- MATERIEL -->
+      <ng-container *ngIf="selectedRessource.type === 'MATERIEL'">
+        <div class="info-row-modal">
+          <span>🔧 Matériel</span>
+          <strong>{{ selectedRessource.nameR }}</strong>
+        </div>
+        <div class="info-row-modal">
+          <span>🏷️ Marque</span>
+          <strong>{{ selectedRessource.marque || '—' }}</strong>
+        </div>
+        <div class="info-row-modal">
+          <span>⚙️ État</span>
+          <strong>{{ selectedRessource.etat || '—' }}</strong>
+        </div>
+        <div class="info-row-modal">
+          <span>💰 Prix location</span>
+          <strong style="color:#1a7a4a;">
+            {{ selectedRessource.prixLocation ? selectedRessource.prixLocation + ' TND' : '—' }}
+          </strong>
+        </div>
+      </ng-container>
+
+      <!-- FERMER -->
+      <button (click)="selectedRessource = null"
+              style="width:100%; padding:12px; border:1.5px solid #e5e7eb;
+                     border-radius:12px; background:#f9fafb; color:#374151;
+                     font-size:14px; font-weight:600; cursor:pointer; margin-top:16px;
+                     transition: all 0.2s;"
+              onmouseover="this.style.background='#f3f4f6'"
+              onmouseout="this.style.background='#f9fafb'">
+        Fermer
+      </button>
+
+    </div>
+  </div>
+</div>

@@ -1,3 +1,40 @@
+<div class="dashboard-layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <h2>🌿 AgriHub</h2>
+      <span>Seller Dashboard</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a routerLink="/seller" routerLinkActive="active"
+         [routerLinkActiveOptions]="{exact: true}">
+        📊 Dashboard
+      </a>
+      <a routerLink="/seller/products" routerLinkActive="active">
+        🛒 My Products
+      </a>
+      <a routerLink="/seller/orders" routerLinkActive="active">
+        📦 My Orders
+      </a>
+      <a routerLink="/seller/demandes" routerLinkActive="active">
+        📦 Demandes
+      </a>
+      <a routerLink="/seller/ressources" routerLinkActive="active">
+        🌿 My Ressources
+      </a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="user-avatar">T</div>
+      <div>
+        <strong>Mariem Jlassi</strong>
+        <p>📍 Nabeul</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="seller-content">
 <div class="seller-content">
 
   <div class="page-header">
@@ -153,6 +190,65 @@
         </tbody>
       </table>
     </div>
+<!-- RECENT RESSOURCES -->
+<div class="section">
+  <h2>Recent Ressources</h2>
+  <table class="simple-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Prix</th>
+        <th>Adresse</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let r of ressources.slice(0,5)">
+        <td>{{ r.nameR }}</td>
+        <td>{{ r.description }}</td>
+        <td>{{ r.prixLocation}}</td>
+        <td>{{ r.adresse}}</td>
+      </tr>
+    </tbody>
+  </table>
+  <a routerLink="/seller/ressources" class="btn-link">
+    View all ressources →
+  </a>
+</div>
+
+<!-- RECENT DEMANDES -->
+<div class="section">
+  <h2>Recent Demandes</h2>
+  <table class="simple-table">
+    <thead>
+      <tr>
+        <th>Demande #</th>
+        <th>Ressource</th>
+        <th>From</th>
+        <th>Status</th>
+        <th>Date d'expiration</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let d of demandes.slice(0,5)">
+        <td>{{ d.demandeId }}</td>
+        <td>{{ getRessourceName(d.ressourceId) }}</td>
+        <td>{{ d.nomDemandeur }}</td>
+        <td>
+          <span [class]="'badge badge-' + d.status?.toLowerCase()">
+            {{ d.status }}
+          </span>
+        </td>
+        <td>{{ d.expireDate | date:'dd/MM/yyyy' }}</td>
+      </tr>
+    </tbody>
+  </table>
+   <a routerLink="/seller/demandes" class="btn-link">
+    View all demandes →
+  </a>
+
+</div>
+
 
   </div>
 

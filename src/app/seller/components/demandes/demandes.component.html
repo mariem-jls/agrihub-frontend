@@ -1,0 +1,261 @@
+<div class="dashboard-layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <h2>🌿 AgriHub</h2>
+      <span>Seller Dashboard</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a routerLink="/seller">📊 Dashboard</a>
+      <a routerLink="/seller/ressources">🌾 Ressources</a>
+      <a routerLink="/seller/demandes" class="active">📩 Demandes</a>
+    </nav>
+  </div>
+
+  <!-- MAIN -->
+  <div class="seller-content">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <div>
+        <h1>📩 Demandes reçues</h1>
+        <p>Gérez et traitez les demandes de vos ressources</p>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card blue">
+        <div class="stat-label">Total</div>
+        <div class="stat-value">{{ demandes.length }}</div>
+      </div>
+      <div class="stat-card gold">
+        <div class="stat-label">En attente</div>
+        <div class="stat-value">{{ countByStatus('en attente') }}</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">Acceptées</div>
+        <div class="stat-value">{{ countByStatus('acceptée') }}</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-label">Refusées</div>
+        <div class="stat-value">{{ countByStatus('refusée') }}</div>
+      </div>
+    </div>
+
+    <!-- FILTRES -->
+    <div class="filters">
+      <select [(ngModel)]="selectedStatus" (change)="applyFilters()">
+        <option value="">🔍 Tous les statuts</option>
+        <option value="en attente">⏳ En attente</option>
+        <option value="acceptée">✅ Acceptée</option>
+        <option value="refusée">❌ Refusée</option>
+        <option value="terminé">🏁 Terminé</option>
+      </select>
+
+      <select [(ngModel)]="selectedPriority" (change)="applyFilters()">
+        <option value="">⚡ Toutes les priorités</option>
+        <option value="haute">🔴 Haute</option>
+        <option value="normale">🟢 Normale</option>
+      </select>
+    </div>
+
+    <!-- LOADING -->
+    <div *ngIf="loading" class="loading">
+      ⏳ Chargement des demandes...
+    </div>
+
+    <!-- EMPTY -->
+    <div *ngIf="!loading && filteredDemandes.length === 0" class="empty-state">
+      <div class="empty-icon">📭</div>
+      <h3>Aucune demande</h3>
+      <p>Aucune demande ne correspond aux filtres sélectionnés</p>
+    </div>
+
+    <!-- TABLE -->
+    <div *ngIf="!loading && filteredDemandes.length > 0" class="table-card">
+      <table class="product-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Ressource</th>
+            <th>Demandeur</th>
+            <th>Proposition</th>
+            <th>Priorité</th>
+            <th>Statut</th>
+            <th>Expiration</th>
+            <th style="text-align:center;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let d of filteredDemandes">
+
+            <!-- ID -->
+            <td style="color:#9ca3af; font-size:12px;">
+              #{{ d.demandeId }}
+            </td>
+
+            <!-- RESSOURCE -->
+            <td>
+              <div class="res-cell">
+                <img class="res-img"
+                     [src]="getRessourceImage(d.ressourceId)
+                       ? 'http://localhost:8089/AgriHub/ressources/images/' + getRessourceImage(d.ressourceId)
+                       : 'assets/images/user.png'"
+                     onerror="this.src='assets/images/user.png'">
+                <span class="res-name">{{ getRessourceName(d.ressourceId) }}</span>
+              </div>
+            </td>
+
+            <!-- DEMANDEUR -->
+            <td>
+              <div class="dem-cell">
+                <div class="dem-avatar">
+                  {{ d.nomDemandeur?.charAt(0)?.toUpperCase() }}
+                </div>
+                <span>{{ d.nomDemandeur || '—' }}</span>
+              </div>
+            </td>
+
+            <!-- PROPOSITION -->
+            <td>
+              <span class="prix-badge">{{ d.proposition }} TND</span>
+            </td>
+
+            <!-- PRIORITÉ -->
+            <td>
+              <span [class]="'badge priority-' + d.priorite?.toLowerCase()">
+                {{ d.priorite === 'haute' ? '🔴 Haute' : '🟢 Normale' }}
+              </span>
+            </td>
+
+            <!-- STATUT -->
+            <td>
+              <span [ngClass]="{
+                'badge': true,
+                'status-en attente': d.status === 'en attente',
+                'status-acceptée':   d.status === 'acceptée',
+                'status-refusée':    d.status === 'refusée',
+                'status-terminé':    d.status === 'terminé'
+              }">
+                {{ d.status === 'acceptée' ? '✅ Acceptée'  :
+                   d.status === 'refusée'  ? '❌ Refusée'   :
+                   d.status === 'terminé'  ? '🏁 Terminé'   : '⏳ En attente' }}
+              </span>
+            </td>
+
+            <!-- DATE -->
+            <td style="color:#6b7280; font-size:12px;">
+              📅 {{ d.expireDate | date:'dd/MM/yyyy' }}
+            </td>
+
+            <!-- ACTIONS -->
+            <td>
+              <div style="display:flex; justify-content:center; gap:6px;">
+               
+                <button class="action-btn btn-view"
+                        (click)="voirDetails(d)"
+                        title="Voir détails">👁</button>
+              </div>
+            </td>
+
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL DÉTAILS -->
+<div class="modal-overlay" *ngIf="selectedDemande"
+     style="animation:fadeIn 0.2s ease;">
+  <div class="modal-box" style="animation:slideUp 0.3s ease;">
+
+    <div class="modal-head">
+      <div>
+        <div style="color:rgba(255,255,255,0.7); font-size:11px;
+                    text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">
+          Demande #{{ selectedDemande.demandeId }}
+        </div>
+        <h5>Détails de la demande</h5>
+      </div>
+      <button class="modal-close" (click)="selectedDemande = null">✕</button>
+    </div>
+
+    <div class="modal-body">
+
+      <div class="info-row-modal">
+        <span>👤 Demandeur</span>
+        <strong>{{ selectedDemande.nomDemandeur }}</strong>
+      </div>
+
+      <div class="info-row-modal">
+        <span>🌾 Ressource</span>
+        <strong>{{ getRessourceName(selectedDemande.ressourceId) }}</strong>
+      </div>
+
+      <div class="info-row-modal">
+        <span>💰 Proposition</span>
+        <strong style="color:#1a7a4a;">{{ selectedDemande.proposition }} TND</strong>
+      </div>
+
+      <div class="info-row-modal">
+        <span>⚡ Priorité</span>
+        <span [class]="'badge priority-' + selectedDemande.priorite?.toLowerCase()">
+          {{ selectedDemande.priorite }}
+        </span>
+      </div>
+
+      <div class="info-row-modal">
+        <span>📊 Statut</span>
+        <span [ngClass]="{
+          'badge': true,
+          'status-en attente': selectedDemande.status === 'en attente',
+          'status-acceptée':   selectedDemande.status === 'acceptée',
+          'status-refusée':    selectedDemande.status === 'refusée',
+          'status-terminé':    selectedDemande.status === 'terminé'
+        }">{{ selectedDemande.status }}</span>
+      </div>
+
+      <div class="info-row-modal">
+        <span>📅 Expiration</span>
+        <strong>{{ selectedDemande.expireDate | date:'fullDate' }}</strong>
+      </div>
+
+      <div style="background:#f9fafb; border-radius:12px; padding:14px; margin-top:8px;">
+        <div style="font-size:11px; color:#9ca3af; font-weight:600;
+                    text-transform:uppercase; margin-bottom:8px;">💬 Message</div>
+        <p style="margin:0; font-size:13px; color:#374151; line-height:1.7;">
+          {{ selectedDemande.message || 'Aucun message.' }}
+        </p>
+      </div>
+
+      <!-- ACTIONS dans le modal -->
+      <div *ngIf="selectedDemande.status === 'en attente'"
+           style="display:flex; gap:10px; margin-top:16px;">
+        <button (click)="accept(selectedDemande.demandeId); selectedDemande = null"
+                style="flex:1; padding:12px; border:none; border-radius:12px;
+                       background:linear-gradient(135deg,#1a7a4a,#25a660);
+                       color:#fff; font-size:14px; font-weight:700; cursor:pointer;">
+          ✔️ Accepter
+        </button>
+        <button (click)="refuse(selectedDemande.demandeId); selectedDemande = null"
+                style="flex:1; padding:12px; border:none; border-radius:12px;
+                       background:linear-gradient(135deg,#dc2626,#ef4444);
+                       color:#fff; font-size:14px; font-weight:700; cursor:pointer;">
+          ❌ Refuser
+        </button>
+      </div>
+
+      <button (click)="selectedDemande = null"
+              style="width:100%; padding:12px; border:1.5px solid #e5e7eb;
+                     border-radius:12px; background:#f9fafb; color:#374151;
+                     font-size:14px; font-weight:600; cursor:pointer; margin-top:10px;">
+        Fermer
+      </button>
+
+    </div>
+  </div>
+</div>
