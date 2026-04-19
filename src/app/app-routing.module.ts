@@ -14,6 +14,12 @@ const routes: Routes = [
       import('./marketplace/marketplace.module')
         .then(m => m.MarketplaceModule)
   },
+{
+    path: 'event',
+    loadChildren: () =>
+      import('./event/event.module').then(m => m.EventModule)
+  },
+
   {
     path: '',
     redirectTo: 'marketplace',

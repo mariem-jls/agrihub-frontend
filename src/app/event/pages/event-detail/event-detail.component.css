@@ -1,0 +1,150 @@
+:host{
+  display: block;
+}
+
+.detail{
+  padding: 18px 18px 20px;
+}
+
+.header{
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.layout{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.media{
+  border-radius: 14px;
+  overflow: hidden;
+  background: #f1f8f1;
+}
+
+.media img{
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+  display: block;
+}
+
+.placeholder{
+  display: grid;
+  place-items: center;
+  height: 220px;
+}
+
+.placeholder-icon{
+  font-size: 40px;
+}
+
+.category-above-title{
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 0 0 4px;
+}
+
+.content .title{
+  margin: 0 0 6px;
+  font-size: 26px;
+  letter-spacing: -0.2px;
+}
+
+.meta{
+  display: grid;
+  gap: 2px;
+  margin-bottom: 10px;
+}
+
+.description{
+  margin: 0 0 14px;
+  line-height: 1.45;
+}
+
+.grid{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.field{
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #f6fbf6;
+}
+
+.field.full{
+  grid-column: 1 / -1;
+}
+
+.specific-block{
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(16, 33, 21, 0.12);
+}
+
+.specific-title{
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a3d24;
+}
+
+.label{
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(16, 33, 21, 0.60);
+}
+
+.value{
+  margin-top: 4px;
+}
+
+.state{
+  padding: 18px 4px 10px;
+}
+
+@media (min-width: 900px){
+  .detail{
+    padding: 22px 24px 22px;
+  }
+  .layout{
+    grid-template-columns: 320px minmax(0, 1fr);
+    align-items: flex-start;
+  }
+}
+
+/* AgriHub — boutons */
+.btn-primary {
+  background: #c9a84c !important;
+  color: #1a3b1a !important;
+  border: none !important;
+}
+.btn-primary:hover {
+  background: #b8923a !important;
+}
+.btn-secondary {
+  background: #f3f4f6 !important;
+  color: #374151 !important;
+  border: none !important;
+}
+.btn-danger {
+  background: #fcebeb !important;
+  color: #791f1f !important;
+  border: 1px solid #f5b8b8 !important;
+}
+.btn-ghost {
+  background: #f9fafb !important;
+  color: #1a3b1a !important;
+  border: 1px solid rgba(26, 59, 26, 0.2) !important;
+}
+.btn-ghost:hover {
+  background: rgba(201, 168, 76, 0.15) !important;
+}

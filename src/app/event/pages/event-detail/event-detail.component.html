@@ -1,0 +1,119 @@
+<section class="detail card">
+  <div class="header">
+    <button class="btn btn-ghost" type="button" (click)="goBack()">Retour</button>
+    <button class="btn btn-primary" type="button" (click)="edit()" *ngIf="event">Modifier</button>
+  </div>
+
+  <div class="state">
+    <p *ngIf="isLoading" class="muted">Chargement des détails de l’événement…</p>
+    <p *ngIf="!isLoading && error" class="muted">{{ error }}</p>
+  </div>
+
+  <div class="layout" *ngIf="!isLoading && event">
+    <div class="media" *ngIf="event.image; else placeholder">
+      <img
+        [src]="'http://localhost:8089/AgriHub/api/events/image/' + event.image + '?v=' + event.id"
+        [alt]="event.nom || 'Événement'"
+      />
+    </div>
+    <ng-template #placeholder>
+      <div class="media placeholder">
+        <span class="placeholder-icon">🌿</span>
+      </div>
+    </ng-template>
+
+    <div class="content">
+      <div class="category-above-title muted" *ngIf="event.categorie">
+        {{ categoryLabels[event.categorie] || event.categorie }}
+      </div>
+      <h1 class="title">{{ event.nom }}</h1>
+
+      <div class="meta muted">
+        <div>📅 {{ event.date }}</div>
+        <div>📍 {{ event.adresse }}</div>
+      </div>
+
+      <p class="description" *ngIf="event.description">
+        {{ event.description }}
+      </p>
+
+      <div class="grid">
+        <div class="field">
+          <div class="label">Nombre de places</div>
+          <div class="value">{{ event.nbrPlaces }}</div>
+        </div>
+      </div>
+
+      <!-- Détails selon la catégorie (même logique que l'entité Spring) -->
+      <div class="specific-block" *ngIf="event.categorie === 'FOIRE_AGRICOLE'">
+        <h2 class="specific-title">Foire agricole</h2>
+        <div class="grid">
+          <div class="field"><div class="label">Nombre d'exposants</div><div class="value">{{ event.nbExposants ?? '—' }}</div></div>
+          <div class="field"><div class="label">Prix d'entrée (TND)</div><div class="value">{{ event.prixEntree ?? '—' }}</div></div>
+          <div class="field full"><div class="label">Types de produits</div><div class="value">{{ event.typeProduits || '—' }}</div></div>
+        </div>
+      </div>
+
+      <div class="specific-block" *ngIf="event.categorie === 'FORMATION'">
+        <h2 class="specific-title">Formation</h2>
+        <div class="grid">
+          <div class="field"><div class="label">Formateur</div><div class="value">{{ event.formateur || '—' }}</div></div>
+          <div class="field"><div class="label">Niveau requis</div><div class="value">{{ event.niveauRequis || '—' }}</div></div>
+          <div class="field"><div class="label">Durée (h)</div><div class="value">{{ event.dureeHeures ?? '—' }}</div></div>
+          <div class="field"><div class="label">Certification</div><div class="value">{{ event.certification == null ? '—' : (event.certification ? 'Oui' : 'Non') }}</div></div>
+        </div>
+      </div>
+
+      <div class="specific-block" *ngIf="event.categorie === 'CONFERENCE'">
+        <h2 class="specific-title">Conférence</h2>
+        <div class="grid">
+          <div class="field"><div class="label">Intervenant</div><div class="value">{{ event.intervenant || '—' }}</div></div>
+          <div class="field full"><div class="label">Thème principal</div><div class="value">{{ event.themePrincipal || '—' }}</div></div>
+        </div>
+      </div>
+
+      <div class="specific-block" *ngIf="event.categorie === 'INVESTISSEMENT'">
+        <h2 class="specific-title">Investissement</h2>
+        <div class="grid">
+          <div class="field"><div class="label">Montant min. (TND)</div><div class="value">{{ event.montantMin ?? '—' }}</div></div>
+          <div class="field"><div class="label">Secteur cible</div><div class="value">{{ event.secteurCible || '—' }}</div></div>
+        </div>
+      </div>
+
+      <div class="specific-block" *ngIf="event.categorie === 'RECYCLAGE'">
+        <h2 class="specific-title">Recyclage</h2>
+        <div class="grid">
+          <div class="field"><div class="label">Types de déchets</div><div class="value">{{ event.typeDechets || '—' }}</div></div>
+          <div class="field"><div class="label">Capacité de traitement</div><div class="value">{{ event.capaciteTraitement || '—' }}</div></div>
+          <div class="field full"><div class="label">Partenaires</div><div class="value">{{ event.partenaires || '—' }}</div></div>
+        </div>
+      </div>
+
+      <div class="specific-block" *ngIf="event.categorie === 'ATELIER_PRATIQUE'">
+        <h2 class="specific-title">Atelier pratique</h2>
+        <div class="grid">
+          <div class="field"><div class="label">Niveau</div><div class="value">{{ event.niveauAtelier || '—' }}</div></div>
+          <div class="field"><div class="label">Prérequis</div><div class="value">{{ event.prerequis || '—' }}</div></div>
+          <div class="field full"><div class="label">Matériel nécessaire</div><div class="value">{{ event.materielNecessaire || '—' }}</div></div>
+        </div>
+      </div>
+
+      <div class="specific-block" *ngIf="event.categorie === 'MARCHE_LOCAL'">
+        <h2 class="specific-title">Marché local</h2>
+        <div class="grid">
+          <div class="field"><div class="label">Horaires</div><div class="value">{{ event.horairesOuverture || '—' }}</div></div>
+          <div class="field"><div class="label">Nombre de stands</div><div class="value">{{ event.nbStands ?? '—' }}</div></div>
+        </div>
+      </div>
+
+      <div class="specific-block" *ngIf="event.categorie === 'INNOVATION_AGRO'">
+        <h2 class="specific-title">Innovation agro</h2>
+        <div class="grid">
+          <div class="field"><div class="label">Technologie</div><div class="value">{{ event.technologie || '—' }}</div></div>
+          <div class="field"><div class="label">Entreprise</div><div class="value">{{ event.entreprise || '—' }}</div></div>
+          <div class="field"><div class="label">Démo disponible</div><div class="value">{{ event.demoDisponible == null ? '—' : (event.demoDisponible ? 'Oui' : 'Non') }}</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

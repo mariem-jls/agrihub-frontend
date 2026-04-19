@@ -39,14 +39,15 @@ import { ReclamationsComponent } from './components/reclamations/reclamations.co
     ProductImageUploadComponent,
     DemandesComponent,
     RessourcesComponent
+    ProductImageUploadComponent
   ],
   imports: [
     CommonModule,
     FormsModule,
     HttpClientModule,
     SellerRoutingModule,
-    RouterModule    ,
-
-  ]
+    RouterModule
+  ],
+  exports: [SellerLayoutComponent]
 })
 export class SellerModule { }

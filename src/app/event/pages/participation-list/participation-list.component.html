@@ -1,0 +1,95 @@
+<div>
+  <div class="page-header">
+    <div>
+      <h1>Participations</h1>
+      <p>Gestion des inscriptions aux événements</p>
+    </div>
+  </div>
+
+  <div *ngIf="actionError" class="alert">{{ actionError }}</div>
+
+  <!-- Tabs Active / Archive -->
+  <div class="tabs-bar">
+    <button class="tab-btn" [class.active]="activeTab === 'active'" (click)="activeTab = 'active'">
+      Active
+      <span class="tab-count">{{ participations.length - countByStatut('REFUSEE') }}</span>
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'archive'" (click)="activeTab = 'archive'">
+      Archive
+      <span class="tab-count tab-count-grey">{{ countByStatut('REFUSEE') }}</span>
+    </button>
+  </div>
+
+  <!-- Filtres statut -->
+  <div class="statut-filters">
+    <button class="statut-btn" *ngFor="let s of statuts"
+      [class.active]="filterStatut === s"
+      (click)="filterStatut = s">
+      {{ s === 'ALL' ? 'ALL' : s }} {{ countByStatut(s) }}
+    </button>
+  </div>
+
+  <!-- Recherche -->
+  <div class="search-bar" style="margin-bottom: 20px;">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <input type="text" [(ngModel)]="searchEvent"
+           placeholder="Rechercher par événement, nom, email..." />
+  </div>
+
+  <div *ngIf="isLoading" class="loading-state">Chargement…</div>
+
+  <div class="table-wrap" *ngIf="!isLoading">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Événement</th>
+          <th>Nom</th>
+          <th>Email</th>
+          <th>Téléphone</th>
+          <th>Places</th>
+          <th>Statut</th>
+          <th>Date</th>
+          <th>Cause</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of filteredRows">
+          <td>
+            <span class="event-cell">{{ eventName(p) }}</span>
+            <span *ngIf="eventStatut(p) === 'COMPLET'" class="badge-complet">COMPLET</span>
+          </td>
+          <td>{{ p.user?.fullName ?? p.nomComplet ?? '—' }}</td>
+          <td>{{ p.user?.email ?? p.email ?? '—' }}</td>
+          <td>{{ p.user?.phone ?? p.telephone ?? '—' }}</td>
+          <td>{{ p.nombrePlaces ?? 1 }}</td>
+          <td>
+            <span class="statut-badge" [ngClass]="statutClass(p.statut)">
+              {{ statutLabel(p.statut) }}
+            </span>
+          </td>
+          <td>{{ formatDate(p.dateInscription) }}</td>
+          <td>{{ p.statut === 'REFUSEE' ? (p.causeDecision ?? '—') : '—' }}</td>
+          <td class="actions-cell">
+            <!-- Confirmée ou En attente → juste un tiret -->
+            <ng-container *ngIf="isConfirmedOnly(p) || canConfirmOrRefuse(p)">
+              <span class="actions-placeholder">—</span>
+            </ng-container>
+            <!-- Refusée → Supprimer -->
+            <button *ngIf="canDeleteOnly(p)" type="button" class="btn-action btn-delete-action"
+              title="Supprimer" [disabled]="busyId === p.id" (click)="supprimer(p)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
+                <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+              </svg>
+              Supprimer
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p *ngIf="filteredRows.length === 0" class="empty-hint">Aucune participation à afficher.</p>
+  </div>
+</div>
