@@ -4,13 +4,17 @@ import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { ProductListComponent } from './components/product-list/product-list.component';
 import { ProductFormComponent } from './components/product-form/product-form.component';
 import { OrderListComponent } from './components/order-list/order-list.component';
+import { DemandesComponent } from './components/demandes/demandes.component';
+import { RessourcesComponent } from './components/ressources/ressources.component';
 
 const routes: Routes = [
   { path: '',         component: DashboardComponent },
   { path: 'products', component: ProductListComponent },
   { path: 'products/add',      component: ProductFormComponent },
   { path: 'products/edit/:id', component: ProductFormComponent },
-  { path: 'orders',   component: OrderListComponent }
+  { path: 'orders',   component: OrderListComponent },
+  { path: 'ressources', component: RessourcesComponent },
+  { path: 'demandes', component: DemandesComponent },
 ];
 
 @NgModule({
