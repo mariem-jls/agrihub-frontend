@@ -105,10 +105,10 @@
             </thead>
             <tbody>
               <tr *ngFor="let p of filteredParticipants">
-                <td class="cell-name">{{ p.nomComplet }}</td>
-                <td>{{ p.email }}</td>
-                <td>{{ p.telephone }}</td>
-                <td>{{ p.nombrePlaces }}</td>
+                <td class="cell-name">{{ p.user.fullName  }}</td>
+                <td>{{ p.user.email }}</td>
+                <td>{{ p.user.phone }}</td>
+                <td>1</td>
                 <td>
                   <span class="statut-badge" [ngClass]="{
                     'badge-confirme': p.statut === 'CONFIRMEE',

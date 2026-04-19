@@ -9,7 +9,6 @@
 
   <!-- STATS -->
   <div class="stats-grid">
-
     <div class="stat-card green">
       <div class="stat-top">
         <span class="stat-label">Total Événements</span>
@@ -70,7 +69,174 @@
       <div class="stat-value red">{{ completEvents }}</div>
       <div class="stat-sub">événements complets</div>
     </div>
+  </div>
 
+  <!-- IA SECTION -->
+  <div class="ai-section">
+    <div class="ai-header">
+      <div class="ai-title-wrap">
+        <div class="ai-badge">🤖 IA</div>
+        <div>
+          <h2 class="ai-title">Analyse Intelligente</h2>
+          <p class="ai-subtitle">Score d'engagement basé sur vos données en temps réel</p>
+        </div>
+      </div>
+      <button class="ai-refresh-btn" (click)="loadAI()" [disabled]="aiLoading">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="23 4 23 10 17 10"/>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+        </svg>
+        {{ aiLoading ? 'Analyse...' : 'Actualiser' }}
+      </button>
+    </div>
+
+    <!-- Loading IA -->
+    <div *ngIf="aiLoading" class="ai-loading">
+      <div class="ai-spinner"></div>
+      <p>Analyse IA en cours…</p>
+    </div>
+
+    <!-- Erreur IA -->
+    <div *ngIf="aiError && !aiLoading" class="ai-error">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      {{ aiError }}
+    </div>
+
+    <!-- Résultat IA -->
+    <div *ngIf="!aiLoading && !aiError && aiScore !== null" class="ai-result">
+
+      <!-- Score circulaire -->
+      <div class="ai-score-wrap">
+        <div class="ai-score-circle">
+          <svg width="120" height="120" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="45" fill="none" stroke="#f3f4f6" stroke-width="8"/>
+            <circle cx="60" cy="60" r="45" fill="none"
+                    [attr.stroke]="scoreColor"
+                    stroke-width="8"
+                    stroke-linecap="round"
+                    stroke-dasharray="282"
+                    [attr.stroke-dashoffset]="scoreDashoffset"
+                    transform="rotate(-90 60 60)"
+                    style="transition: stroke-dashoffset 1s ease"/>
+          </svg>
+          <div class="ai-score-center">
+            <span class="ai-score-num" [style.color]="scoreColor">{{ aiScore | number:'1.0-0' }}</span>
+            <span class="ai-score-unit">/ 100</span>
+          </div>
+        </div>
+        <div class="ai-score-label">Score d'engagement</div>
+      </div>
+
+      <!-- Segment -->
+      <div class="ai-segment-wrap">
+        <div class="ai-segment-badge"
+             [style.background]="segmentBg"
+             [style.color]="segmentColor">
+          {{ aiSegment }}
+        </div>
+        <p class="ai-segment-desc">
+          <span *ngIf="aiSegment?.includes('HOT')">🔥 Activité très élevée — Excellente performance !</span>
+          <span *ngIf="aiSegment?.includes('WARM')">🟡 Activité modérée — Des améliorations possibles.</span>
+          <span *ngIf="aiSegment?.includes('COLD')">🔵 Activité faible — Relancez vos campagnes.</span>
+        </p>
+
+        <!-- Barre de progression -->
+        <div class="ai-progress-wrap">
+          <div class="ai-progress-bar">
+            <div class="ai-progress-fill"
+                 [style.width.%]="aiScore"
+                 [style.background]="scoreColor"></div>
+          </div>
+          <div class="ai-progress-labels">
+            <span>COLD</span>
+            <span>WARM</span>
+            <span>HOT</span>
+          </div>
+        </div>
+
+        <!-- Métriques -->
+        <div class="ai-metrics">
+          <div class="ai-metric">
+            <span class="ai-metric-val">{{ totalParticipations }}</span>
+            <span class="ai-metric-label">Inscriptions</span>
+          </div>
+          <div class="ai-metric">
+            <span class="ai-metric-val">{{ confirmedParticipations }}</span>
+            <span class="ai-metric-label">Confirmées</span>
+          </div>
+          <div class="ai-metric">
+            <span class="ai-metric-val">{{ totalEvents }}</span>
+            <span class="ai-metric-label">Événements</span>
+          </div>
+          <div class="ai-metric">
+            <span class="ai-metric-val">{{ completEvents }}</span>
+            <span class="ai-metric-label">Complets</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alertes -->
+      <div class="ai-alerts-wrap">
+        <h3 class="ai-alerts-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          Alertes
+        </h3>
+        <div *ngIf="aiAlerts.length === 0" class="ai-no-alert">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2c5f2d" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Aucune alerte détectée
+        </div>
+        <div *ngFor="let alert of aiAlerts" class="ai-alert-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e24b4a" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          {{ alert }}
+        </div>
+      </div>
+
+<!-- Recommandations -->
+<div class="ai-recommendations-wrap" *ngIf="aiRecommendations.length > 0">
+  <h3 class="ai-alerts-title">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8" x2="12" y2="12"/>
+      <line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    Recommandations
+  </h3>
+  <div *ngFor="let rec of aiRecommendations" class="ai-rec-item">
+    {{ rec }}
+  </div>
+</div>
+
+<!-- Détails -->
+<div class="ai-details-wrap" *ngIf="aiDetails">
+  <div class="ai-detail-item">
+    <span class="ai-detail-val">{{ aiDetails.taux_confirmation }}%</span>
+    <span class="ai-detail-label">Taux confirmation</span>
+  </div>
+  <div class="ai-detail-item">
+    <span class="ai-detail-val">{{ aiDetails.events_actifs }}</span>
+    <span class="ai-detail-label">Events actifs</span>
+  </div>
+  <div class="ai-detail-item">
+    <span class="ai-detail-val">{{ aiDetails.taux_completion }}%</span>
+    <span class="ai-detail-label">Taux complet</span>
+  </div>
+</div>
+
+
+    </div>
   </div>
 
   <!-- SECTIONS -->
@@ -115,9 +281,7 @@
             </td>
           </tr>
           <tr *ngIf="events.length === 0">
-            <td colspan="4" style="text-align:center; color:#9ca3af; padding:20px;">
-              Aucun événement
-            </td>
+            <td colspan="4" style="text-align:center; color:#9ca3af; padding:20px;">Aucun événement</td>
           </tr>
         </tbody>
       </table>
@@ -148,16 +312,12 @@
               {{ p.nomEvent ?? '—' }}
             </td>
             <td>
-              <span class="b" [ngClass]="statutClass(p.statut)">
-                {{ statutLabel(p.statut) }}
-              </span>
+              <span class="b" [ngClass]="statutClass(p.statut)">{{ statutLabel(p.statut) }}</span>
             </td>
             <td class="order-date">{{ formatDate(p.dateInscription) }}</td>
           </tr>
           <tr *ngIf="participations.length === 0">
-            <td colspan="4" style="text-align:center; color:#9ca3af; padding:20px;">
-              Aucune participation
-            </td>
+            <td colspan="4" style="text-align:center; color:#9ca3af; padding:20px;">Aucune participation</td>
           </tr>
         </tbody>
       </table>

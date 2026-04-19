@@ -87,12 +87,16 @@ get filteredRows() {
   return this.participations.filter(p => {
     const isArchive = p.statut === 'REFUSEE';
     const tabMatch = this.activeTab === 'archive' ? isArchive : !isArchive;
-    const statutMatch = this.filterStatut === 'ALL' || p.statut === this.filterStatut;
+    
+    // ← Fix : mapper LISTE_ATTENTE → EN_ATTENTE_LISTE
+    const mapped = this.filterStatut === 'LISTE_ATTENTE' ? 'EN_ATTENTE_LISTE' : this.filterStatut;
+    const statutMatch = this.filterStatut === 'ALL' || p.statut === mapped;
+    
     const search = this.searchEvent.toLowerCase();
     const searchMatch = !search ||
       this.eventName(p).toLowerCase().includes(search) ||
-      p.nomComplet.toLowerCase().includes(search) ||
-      p.email.toLowerCase().includes(search);
+      (p.nomComplet ?? '').toLowerCase().includes(search) ||
+      (p.email ?? '').toLowerCase().includes(search);
     return tabMatch && statutMatch && searchMatch;
   });
 }
