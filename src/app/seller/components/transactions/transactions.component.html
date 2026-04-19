@@ -1,0 +1,71 @@
+<div class="dashboard-layout">
+  <!-- SIDEBAR similaire aux autres composants -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <h2>🌿 AgriHub</h2>
+      <span>Seller Dashboard</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a routerLink="/seller" routerLinkActive="active"> 📊 Dashboard </a>
+      <a routerLink="/seller/products" routerLinkActive="active">
+        🛒 My Products
+      </a>
+      <a routerLink="/seller/funding-projects" routerLinkActive="active">
+        💰 Funding Projects
+      </a>
+      <a routerLink="/seller/contributions" routerLinkActive="active">
+        💸 Contributions
+      </a>
+      <a routerLink="/seller/wallets" routerLinkActive="active"> 💰 Wallets </a>
+      <a routerLink="/seller/orders" routerLinkActive="active">
+        📦 My Orders
+      </a>
+    </nav>
+  </div>
+
+  <div class="seller-content">
+    <div class="page-header">
+      <h1>Transactions</h1>
+      <p>View all user transactions</p>
+    </div>
+
+    <div *ngIf="loading" class="loading">Loading transactions...</div>
+
+    <div class="filters" style="margin-bottom: 1rem; text-align: left">
+      <input
+        type="text"
+        placeholder="Search by user name, email or type"
+        [(ngModel)]="searchText"
+        (input)="applyFilter()"
+        class="search-input"
+      />
+    </div>
+
+    <div *ngIf="!loading && transactions.length === 0" class="empty-state">
+      <h3>No transactions found</h3>
+    </div>
+
+    <div *ngIf="!loading && transactions.length > 0" class="table-card">
+      <table class="product-table">
+        <thead>
+          <tr>
+            <th>Amount</th>
+            <th>Type</th>
+            <th>Date</th>
+            <th>User Name</th>
+            <th>User Email</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let t of filteredTransactions">
+            <td>{{ t.montant }} DT</td>
+            <td>{{ t.transactionType }}</td>
+            <td>{{ t.dateTransaction | date: "short" }}</td>
+            <td>{{ t.userName }}</td>
+            <td>{{ t.userEmail }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,168 @@
+<div class="dashboard-layout">
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <h2>🌿 AgriHub</h2>
+      <span>Seller Dashboard</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a routerLink="/seller" routerLinkActive="active"> 📊 Dashboard </a>
+      <a routerLink="/seller/products" routerLinkActive="active">
+        🛒 My Products
+      </a>
+      <a routerLink="/seller/funding-projects" routerLinkActive="active">
+        💰 Funding Projects
+      </a>
+      <a routerLink="/seller/orders" routerLinkActive="active">
+        📦 My Orders
+      </a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="user-avatar">T</div>
+      <div>
+        <strong>Mariem Jlassi</strong>
+        <p>📍 Nabeul</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="seller-content">
+    <div class="page-header">
+      <h1>Réclamations</h1>
+      <p>Gérez toutes les réclamations des utilisateurs</p>
+    </div>
+
+    <div *ngIf="loading" class="loading">Chargement...</div>
+
+    <div class="filters">
+      <input
+        type="text"
+        placeholder="Rechercher par titre, type ou utilisateur"
+        [(ngModel)]="searchText"
+        (input)="applyFilters()"
+        class="search-input"
+      />
+    </div>
+
+    <div
+      *ngIf="!loading && filteredReclamations.length === 0"
+      class="empty-state"
+    >
+      <div class="empty-icon">📭</div>
+      <h3>Aucune réclamation</h3>
+    </div>
+
+    <div *ngIf="!loading && filteredReclamations.length > 0" class="table-card">
+      <table class="product-table">
+        <thead>
+          <tr>
+            <th>Titre</th>
+            <th>Description</th>
+            <th>Type</th>
+            <th>Priorité</th>
+            <th>Date Création</th>
+            <th>Status</th>
+            <th>Utilisateur</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of filteredReclamations">
+            <td>{{ r.titre }}</td>
+            <td>{{ r.description }}</td>
+            <td>{{ r.type }}</td>
+            <td>{{ r.priorite }}</td>
+            <td>{{ r.dateCreation | date: "short" }}</td>
+            <td>
+              <span [class]="'badge badge-' + r.status.toLowerCase()">{{
+                r.status
+              }}</span>
+            </td>
+            <td>{{ r.userName }}</td>
+            <td>
+              <div *ngIf="r.status === 'EN_ATTENTE'; else actions">
+                <button
+                  class="btn btn-success btn-sm me-2"
+                  (click)="accepterReclamation(r.id)"
+                >
+                  ✅ Accepter
+                </button>
+                <button
+                  class="btn btn-danger btn-sm"
+                  (click)="refuserReclamation(r.id)"
+                >
+                  ❌ Refuser
+                </button>
+              </div>
+              <ng-template #actions>
+                <div *ngIf="r.status === 'EN_COURS' && r.visible ">
+                  <button
+                    class="btn btn-primary btn-sm"
+                    (click)="openResponsePopup(r)"
+                  >
+                    💬 Répondre
+                  </button>
+                  <button
+                    class="btn btn-primary btn-sm"
+                    (click)="finirReclamation(r.id)"
+                  >
+                    💬 Finir
+                  </button>
+                </div>
+
+                <div *ngIf="r.status == 'RESOLUE' || r.visible === false">
+                  <button
+                    class="btn btn-primary btn-sm"
+                    (click)="openResponsePopup(r)"
+                  >
+                    afficher reponse
+                  </button>
+                </div>
+              </ng-template>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- POPUP MODAL -->
+<div class="popup-backdrop" *ngIf="showPopup">
+  <div class="popup">
+    <div class="popup-header">
+      <h3>Répondre à la réclamation</h3>
+      <button class="close-btn" (click)="closePopup()">✖</button>
+    </div>
+    <div class="popup-body">
+      <h4>{{ selectedReclamation?.titre }}</h4>
+      <p>
+        <strong>Description:</strong> {{ selectedReclamation?.description }}
+      </p>
+      <p><strong>Type:</strong> {{ selectedReclamation?.type }}</p>
+      <p><strong>Utilisateur:</strong> {{ selectedReclamation?.userName }}</p>
+      <p><strong>Status:</strong> {{ selectedReclamation?.status }}</p>
+
+      <hr />
+
+      <div class="responses">
+        <h5>Réponses existantes</h5>
+        <div *ngFor="let resp of responses">
+          <p>
+            📌 {{ resp.content }}
+            <small>({{ resp.dateReponse | date: "short" }})</small>
+          </p>
+        </div>
+      </div>
+      <div *ngIf="selectedReclamation?.status === 'EN_COURS' && selectedReclamation?.visible === true" class="response-form">
+        <textarea
+          [(ngModel)]="newResponse"
+          placeholder="Écrire votre réponse..."
+          class="response-input"
+        ></textarea>
+        <button class="btn btn-success mt-2" (click)="submitResponse()">
+          Envoyer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
