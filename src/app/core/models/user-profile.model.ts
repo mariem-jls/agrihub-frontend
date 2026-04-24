@@ -8,10 +8,18 @@ export interface UserProfile {
   fullName?: string;
   phone?: string;
   address?: string;
+  region?: string;
+  organizationName?: string;
+  activityDescription?: string;
   createdAt?: string;
   updatedAt?: string;
   userType?: BusinessUserType;
   onboardingCompleted: boolean;
+  aiReadinessScore?: number | null;
+  aiRiskScore?: number | null;
+  aiRecommendation?: string | null;
+  duplicateWarningCount?: number | null;
+  aiReviewedAt?: string | null;
   accountEnabled: boolean;
   orphanedInKeycloak: boolean;
 }

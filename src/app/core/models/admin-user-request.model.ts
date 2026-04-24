@@ -7,6 +7,9 @@ export interface CreateBusinessUserRequest {
   fullName: string;
   phone: string;
   address: string;
+  region: string;
+  organizationName: string;
+  activityDescription: string;
   userType: BusinessUserType;
 }
 
@@ -14,5 +17,8 @@ export interface UpdateBusinessUserRequest {
   fullName: string;
   phone: string;
   address: string;
+  region: string;
+  organizationName: string;
+  activityDescription: string;
   userType: BusinessUserType;
 }

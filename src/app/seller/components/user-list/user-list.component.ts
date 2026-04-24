@@ -15,6 +15,7 @@ export class UserListComponent implements OnInit {
   loading = false;
   message = '';
   messageType = '';
+  aiFilter: 'ALL' | 'NEEDS_REVIEW' | 'HIGH_RISK' | 'POSSIBLE_DUPLICATES' = 'ALL';
 
   constructor(
     private userService: UserService,
@@ -36,7 +37,7 @@ export class UserListComponent implements OnInit {
       error: (err) => {
         console.error(err);
         this.loading = false;
-        this.showMessage('Error loading users.', 'error');
+        this.showMessage(this.extractErrorMessage(err, 'Error loading users.'), 'error');
       }
     });
   }
@@ -133,6 +134,34 @@ export class UserListComponent implements OnInit {
     }
 
     return user.accountEnabled ? 'Active' : 'Locked';
+  }
+
+  get filteredUsers(): UserProfile[] {
+    return this.users.filter((user) => {
+      if (this.aiFilter === 'ALL') {
+        return true;
+      }
+      if (this.aiFilter === 'NEEDS_REVIEW') {
+        return user.aiRecommendation === 'NEEDS_REVIEW';
+      }
+      if (this.aiFilter === 'HIGH_RISK') {
+        return user.aiRecommendation === 'HIGH_RISK';
+      }
+      return (user.duplicateWarningCount ?? 0) > 0;
+    });
+  }
+
+  getAiBadgeClass(user: UserProfile): string {
+    if (user.aiRecommendation === 'HIGH_RISK') {
+      return 'badge-orphan';
+    }
+    if (user.aiRecommendation === 'NEEDS_REVIEW') {
+      return 'badge-pending';
+    }
+    if (user.aiRecommendation === 'HEALTHY') {
+      return 'badge-active';
+    }
+    return 'badge-inactive';
   }
 
   private replaceUser(updated: UserProfile): void {

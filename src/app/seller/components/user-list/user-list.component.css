@@ -97,6 +97,22 @@
   margin-bottom: 28px;
 }
 
+.page-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.filter-select {
+  min-width: 180px;
+  padding: 10px 12px;
+  border: 1px solid #d4e4d4;
+  border-radius: 10px;
+  background: white;
+  color: #1e4220;
+  font-size: 14px;
+}
+
 .page-header h1 {
   font-size: 26px;
   color: #2C5F2D;
@@ -218,6 +234,11 @@
   color: #92400e;
 }
 
+.badge-pending {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
 .account-hint {
   margin-top: 6px;
   color: #92400e;
@@ -301,4 +322,22 @@
   font-weight: 600;
   padding: 6px 12px;
   opacity: 0.8;
+}
+
+@media (max-width: 900px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .page-header__actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-select {
+    width: 100%;
+  }
 }

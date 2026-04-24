@@ -248,6 +248,96 @@
         </span>
       </div>
 
+      <div class="form-row">
+        <div class="form-group">
+          <label>
+            Region
+            <span class="required">*</span>
+          </label>
+
+          <input
+            *ngIf="!isEditMode"
+            type="text"
+            [(ngModel)]="createRequest.region"
+            (ngModelChange)="clearFieldError('region')"
+            placeholder="Enter region or governorate"
+            [class.input-error]="isRegionInvalid()"
+          />
+
+          <input
+            *ngIf="isEditMode"
+            type="text"
+            [(ngModel)]="updateRequest.region"
+            (ngModelChange)="clearFieldError('region')"
+            placeholder="Enter region or governorate"
+            [class.input-error]="isRegionInvalid()"
+          />
+
+          <span class="error-msg" *ngIf="isRegionInvalid()">
+            {{ getFieldError('region') }}
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label>Organization Name</label>
+
+          <input
+            *ngIf="!isEditMode"
+            type="text"
+            [(ngModel)]="createRequest.organizationName"
+            (ngModelChange)="clearFieldError('organizationName')"
+            placeholder="Optional organization or business name"
+            [class.input-error]="hasFieldError('organizationName')"
+          />
+
+          <input
+            *ngIf="isEditMode"
+            type="text"
+            [(ngModel)]="updateRequest.organizationName"
+            (ngModelChange)="clearFieldError('organizationName')"
+            placeholder="Optional organization or business name"
+            [class.input-error]="hasFieldError('organizationName')"
+          />
+
+          <span class="error-msg" *ngIf="hasFieldError('organizationName')">
+            {{ getFieldError('organizationName') }}
+          </span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>
+          Activity Description
+          <span class="required">*</span>
+        </label>
+
+        <textarea
+          *ngIf="!isEditMode"
+          [(ngModel)]="createRequest.activityDescription"
+          (ngModelChange)="clearFieldError('activityDescription')"
+          rows="5"
+          placeholder="Describe what this user does, where they operate, and how they use AgriHub."
+          [class.input-error]="isActivityDescriptionInvalid()"
+        ></textarea>
+
+        <textarea
+          *ngIf="isEditMode"
+          [(ngModel)]="updateRequest.activityDescription"
+          (ngModelChange)="clearFieldError('activityDescription')"
+          rows="5"
+          placeholder="Describe what this user does, where they operate, and how they use AgriHub."
+          [class.input-error]="isActivityDescriptionInvalid()"
+        ></textarea>
+
+        <small class="helper-text">
+          Ask for enough operational detail so admins can review the account with context.
+        </small>
+
+        <span class="error-msg" *ngIf="isActivityDescriptionInvalid()">
+          {{ getFieldError('activityDescription') }}
+        </span>
+      </div>
+
       <div *ngIf="isEditMode" class="form-row">
         <div class="form-group">
           <label>Created At</label>
@@ -261,6 +351,88 @@
             [value]="originalUser?.onboardingCompleted ? 'Completed' : 'Pending'"
             disabled
           />
+        </div>
+      </div>
+
+      <div *ngIf="isEditMode" class="ai-panel">
+        <div class="ai-panel__header">
+          <div>
+            <h3>AI Review</h3>
+            <p>Review the current form values before saving, then rely on the saved review after update.</p>
+          </div>
+          <button class="btn btn-secondary" type="button" (click)="rerunAiReview()">
+            Review Current Form
+          </button>
+        </div>
+
+        <div *ngIf="aiLoading" class="loading-inline">Reviewing profile...</div>
+        <div *ngIf="!aiLoading && !aiReview" class="ai-empty">
+          No saved AI review yet. Review the current form or update the user to store one.
+        </div>
+
+        <div *ngIf="!aiLoading && aiReview" class="ai-review-grid">
+          <div class="ai-metric">
+            <span>Readiness</span>
+            <strong>{{ aiReview.readinessScore ?? 0 }}/100</strong>
+          </div>
+          <div class="ai-metric">
+            <span>Risk</span>
+            <strong>{{ aiReview.riskScore ?? 0 }}/100</strong>
+          </div>
+          <div class="ai-metric">
+            <span>Status</span>
+            <strong>{{ aiReview.recommendation }}</strong>
+          </div>
+        </div>
+
+        <div *ngIf="aiReview" class="ai-source">
+          Source: <strong>{{ aiReview.modelName }}</strong>
+        </div>
+
+        <p *ngIf="aiReview" class="ai-summary">{{ aiReview.summary }}</p>
+
+        <div *ngIf="aiReview" class="ai-columns">
+          <div class="ai-box">
+            <h4>Flags</h4>
+            <div *ngIf="aiReview.flags.length === 0" class="ai-empty">No important flags.</div>
+            <div *ngFor="let flag of aiReview.flags" class="ai-chip-row">
+              <span class="ai-chip" [attr.data-severity]="flag.severity">{{ flag.severity }}</span>
+              <span>{{ flag.message }}</span>
+            </div>
+          </div>
+
+          <div class="ai-box">
+            <h4>Suggestions</h4>
+            <div *ngIf="aiReview.suggestions.length === 0" class="ai-empty">No suggestions.</div>
+            <div *ngFor="let suggestion of aiReview.suggestions" class="ai-suggestion">
+              <strong>{{ suggestion.field }}</strong>
+              <p>{{ suggestion.message }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="ai-box">
+          <div class="ai-box__header">
+            <h4>Duplicate candidates</h4>
+            <span *ngIf="duplicateScan">{{ duplicateScan.candidateCount }}</span>
+          </div>
+
+          <div *ngIf="duplicatesLoading" class="loading-inline">Scanning for similar accounts...</div>
+          <div *ngIf="!duplicatesLoading && duplicateScan?.candidateCount === 0" class="ai-empty">
+            No similar accounts detected.
+          </div>
+          <div *ngIf="!duplicatesLoading && duplicateScan?.candidateCount" class="duplicate-list">
+            <div *ngFor="let candidate of duplicateScan?.candidates" class="duplicate-card">
+              <div>
+                <strong>{{ candidate.username }}</strong>
+                <p>{{ candidate.email }}</p>
+              </div>
+              <span class="badge badge-orphan">Score {{ candidate.matchScore }}</span>
+              <ul>
+                <li *ngFor="let reason of candidate.reasons">{{ reason }}</li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
 

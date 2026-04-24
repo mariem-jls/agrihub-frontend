@@ -232,6 +232,149 @@
   min-height: 100px;
 }
 
+.ai-panel {
+  margin-top: 28px;
+  padding: 24px;
+  border-radius: 16px;
+  background: #f9fdf9;
+  border: 1px solid #d4e4d4;
+}
+
+.ai-panel__header,
+.ai-box__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.ai-panel__header h3,
+.ai-box h4 {
+  margin: 0;
+  color: #1e4220;
+}
+
+.ai-panel__header p,
+.ai-summary,
+.ai-suggestion p,
+.duplicate-card p {
+  margin: 6px 0 0;
+  color: #6b7c6b;
+}
+
+.ai-source {
+  margin-top: 14px;
+  font-size: 13px;
+  color: #4b5d4c;
+}
+
+.loading-inline,
+.ai-empty {
+  padding: 12px 14px;
+  margin-top: 14px;
+  border-radius: 12px;
+  background: white;
+  color: #6b7c6b;
+}
+
+.ai-review-grid,
+.ai-columns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.ai-columns {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.ai-metric,
+.ai-box,
+.duplicate-card {
+  padding: 16px;
+  border-radius: 14px;
+  background: white;
+  border: 1px solid #e1ece1;
+}
+
+.ai-metric span {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #6b7c6b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.ai-metric strong {
+  color: #1e4220;
+  font-size: 20px;
+}
+
+.ai-chip-row,
+.ai-suggestion {
+  padding: 12px 0;
+  border-bottom: 1px solid #edf3ed;
+}
+
+.ai-chip-row:last-child,
+.ai-suggestion:last-child {
+  border-bottom: none;
+}
+
+.ai-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  margin-right: 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.ai-chip[data-severity="high"] {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.ai-chip[data-severity="medium"] {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.ai-chip[data-severity="low"] {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.duplicate-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.duplicate-card ul {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  color: #6b7c6b;
+}
+
+.duplicate-card .badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 /* Form Actions */
 .form-actions {
   display: flex;
@@ -315,5 +458,10 @@
   .form-actions {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .ai-review-grid,
+  .ai-columns {
+    grid-template-columns: 1fr;
   }
 }

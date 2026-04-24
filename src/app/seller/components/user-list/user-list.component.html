@@ -34,9 +34,17 @@
         <h1>Users</h1>
         <p>Manage platform users</p>
       </div>
-      <button class="btn btn-primary" (click)="goToAdd()">
-        + Add New User
-      </button>
+      <div class="page-header__actions">
+        <select [(ngModel)]="aiFilter" class="filter-select">
+          <option value="ALL">All users</option>
+          <option value="NEEDS_REVIEW">Needs review</option>
+          <option value="HIGH_RISK">High risk</option>
+          <option value="POSSIBLE_DUPLICATES">Possible duplicates</option>
+        </select>
+        <button class="btn btn-primary" (click)="goToAdd()">
+          + Add New User
+        </button>
+      </div>
     </div>
 
     <div *ngIf="message" [class]="'alert alert-' + messageType">
@@ -47,7 +55,7 @@
       Loading users...
     </div>
 
-    <div *ngIf="!loading && users.length === 0" class="empty-state">
+    <div *ngIf="!loading && filteredUsers.length === 0" class="empty-state">
       <div class="empty-icon">User</div>
       <h3>No users found</h3>
       <p>Start by adding your first user</p>
@@ -56,7 +64,7 @@
       </button>
     </div>
 
-    <div *ngIf="!loading && users.length > 0" class="table-card">
+    <div *ngIf="!loading && filteredUsers.length > 0" class="table-card">
       <table class="product-table">
         <thead>
         <tr>
@@ -67,13 +75,15 @@
           <th>Phone</th>
           <th>Address</th>
           <th>User Type</th>
+          <th>Region</th>
           <th>Account</th>
           <th>Onboarding</th>
+          <th>AI Review</th>
           <th>Actions</th>
         </tr>
         </thead>
         <tbody>
-        <tr *ngFor="let u of users">
+        <tr *ngFor="let u of filteredUsers">
           <td>{{ u.id }}</td>
           <td><strong>{{ u.username }}</strong></td>
           <td>{{ u.fullName || '-' }}</td>
@@ -85,6 +95,7 @@
                 {{ u.userType || '-' }}
               </span>
           </td>
+          <td>{{ u.region || '-' }}</td>
           <td>
               <span [class]="'badge ' + getAccountStatusClass(u)">
                 {{ getAccountStatusLabel(u) }}
@@ -97,6 +108,17 @@
               <span [class]="'badge ' + (u.onboardingCompleted ? 'badge-active' : 'badge-inactive')">
                 {{ u.onboardingCompleted ? 'Completed' : 'Pending' }}
               </span>
+          </td>
+          <td>
+              <span [class]="'badge ' + getAiBadgeClass(u)">
+                {{ u.aiRecommendation || 'Not reviewed' }}
+              </span>
+            <div class="account-hint" *ngIf="u.aiReadinessScore !== undefined && u.aiReadinessScore !== null">
+              Q {{ u.aiReadinessScore }}/100 | R {{ u.aiRiskScore }}/100
+            </div>
+            <div class="account-hint" *ngIf="(u.duplicateWarningCount ?? 0) > 0">
+              {{ u.duplicateWarningCount }} possible duplicate(s)
+            </div>
           </td>
           <td>
             <div class="action-buttons">

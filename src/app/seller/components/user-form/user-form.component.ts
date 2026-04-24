@@ -8,6 +8,7 @@ import {
   UpdateBusinessUserRequest,
   BusinessUserType
 } from '../../../core/models/admin-user-request.model';
+import { DuplicateScanResult, UserAiReview } from '../../../core/models/user-ai.model';
 
 type UserFormField =
   | 'username'
@@ -16,6 +17,9 @@ type UserFormField =
   | 'fullName'
   | 'phone'
   | 'address'
+  | 'region'
+  | 'organizationName'
+  | 'activityDescription'
   | 'userType';
 
 @Component({
@@ -35,6 +39,10 @@ export class UserFormComponent implements OnInit {
   message = '';
   messageType = '';
   fieldErrors: Partial<Record<UserFormField, string>> = {};
+  aiReview: UserAiReview | null = null;
+  duplicateScan: DuplicateScanResult | null = null;
+  aiLoading = false;
+  duplicatesLoading = false;
 
   originalUser: UserProfile | null = null;
 
@@ -45,6 +53,9 @@ export class UserFormComponent implements OnInit {
     fullName: '',
     phone: '',
     address: '',
+    region: '',
+    organizationName: '',
+    activityDescription: '',
     userType: 'AGRICULTOR'
   };
 
@@ -52,6 +63,9 @@ export class UserFormComponent implements OnInit {
     fullName: '',
     phone: '',
     address: '',
+    region: '',
+    organizationName: '',
+    activityDescription: '',
     userType: 'AGRICULTOR'
   };
 
@@ -86,9 +100,13 @@ export class UserFormComponent implements OnInit {
           fullName: data.fullName || '',
           phone: data.phone || '',
           address: data.address || '',
+          region: data.region || '',
+          organizationName: data.organizationName || '',
+          activityDescription: data.activityDescription || '',
           userType: (data.userType as BusinessUserType) || 'AGRICULTOR'
         };
         this.loading = false;
+        this.loadAiInsights(id);
       },
       error: (err) => {
         console.error('Error loading user', err);
@@ -126,6 +144,14 @@ export class UserFormComponent implements OnInit {
     return this.hasFieldError('address');
   }
 
+  isRegionInvalid(): boolean {
+    return this.hasFieldError('region');
+  }
+
+  isActivityDescriptionInvalid(): boolean {
+    return this.hasFieldError('activityDescription');
+  }
+
   isFormValid(): boolean {
     return Object.keys(this.buildClientValidationErrors()).length === 0;
   }
@@ -147,6 +173,9 @@ export class UserFormComponent implements OnInit {
         fullName: this.updateRequest.fullName.trim(),
         phone: this.updateRequest.phone.trim(),
         address: this.updateRequest.address.trim(),
+        region: this.updateRequest.region.trim(),
+        organizationName: this.updateRequest.organizationName.trim(),
+        activityDescription: this.updateRequest.activityDescription.trim(),
         userType: this.updateRequest.userType
       };
 
@@ -154,6 +183,7 @@ export class UserFormComponent implements OnInit {
         next: () => {
           this.fieldErrors = {};
           this.showMessage('User updated successfully', 'success');
+          this.loadAiInsights(this.userId!);
           setTimeout(() => this.router.navigate(['/seller/users']), 1500);
         },
         error: (err) => {
@@ -171,6 +201,9 @@ export class UserFormComponent implements OnInit {
         fullName: this.createRequest.fullName.trim(),
         phone: this.createRequest.phone.trim(),
         address: this.createRequest.address.trim(),
+        region: this.createRequest.region.trim(),
+        organizationName: this.createRequest.organizationName.trim(),
+        activityDescription: this.createRequest.activityDescription.trim(),
         userType: this.createRequest.userType
       };
 
@@ -232,6 +265,18 @@ export class UserFormComponent implements OnInit {
     return this.isEditMode ? this.updateRequest.address : this.createRequest.address;
   }
 
+  private getRegionValue(): string {
+    return this.isEditMode ? this.updateRequest.region : this.createRequest.region;
+  }
+
+  private getOrganizationNameValue(): string {
+    return this.isEditMode ? this.updateRequest.organizationName : this.createRequest.organizationName;
+  }
+
+  private getActivityDescriptionValue(): string {
+    return this.isEditMode ? this.updateRequest.activityDescription : this.createRequest.activityDescription;
+  }
+
   private buildClientValidationErrors(): Partial<Record<UserFormField, string>> {
     const errors: Partial<Record<UserFormField, string>> = {};
 
@@ -270,6 +315,9 @@ export class UserFormComponent implements OnInit {
     const fullName = this.getFullNameValue().trim();
     const phone = this.getPhoneValue().trim();
     const address = this.getAddressValue().trim();
+    const region = this.getRegionValue().trim();
+    const organizationName = this.getOrganizationNameValue().trim();
+    const activityDescription = this.getActivityDescriptionValue().trim();
     const userType = this.isEditMode ? this.updateRequest.userType : this.createRequest.userType;
 
     if (!fullName) {
@@ -290,6 +338,22 @@ export class UserFormComponent implements OnInit {
       errors.address = 'Address is required';
     } else if (address.length < 5 || address.length > 200) {
       errors.address = 'Address must be between 5 and 200 characters';
+    }
+
+    if (!region) {
+      errors.region = 'Region is required';
+    } else if (region.length < 2 || region.length > 80) {
+      errors.region = 'Region must be between 2 and 80 characters';
+    }
+
+    if (organizationName && organizationName.length > 160) {
+      errors.organizationName = 'Organization name must not exceed 160 characters';
+    }
+
+    if (!activityDescription) {
+      errors.activityDescription = 'Activity description is required';
+    } else if (activityDescription.length < 150 || activityDescription.length > 500) {
+      errors.activityDescription = 'Activity description must be between 150 and 500 characters';
     }
 
     if (!userType) {
@@ -334,5 +398,76 @@ export class UserFormComponent implements OnInit {
     }
 
     return fallback;
+  }
+
+  loadAiInsights(id: number): void {
+    this.aiReview = null;
+    this.duplicateScan = null;
+    this.aiLoading = true;
+    this.duplicatesLoading = true;
+
+    this.userService.getAiReview(id).subscribe({
+      next: (review) => {
+        this.aiReview = review;
+        this.aiLoading = false;
+      },
+      error: () => {
+        this.aiReview = null;
+        this.aiLoading = false;
+      }
+    });
+
+    this.userService.getDuplicateCandidates(id).subscribe({
+      next: (scan) => {
+        this.duplicateScan = scan;
+        this.duplicatesLoading = false;
+      },
+      error: () => {
+        this.duplicateScan = null;
+        this.duplicatesLoading = false;
+      }
+    });
+  }
+
+  rerunAiReview(): void {
+    if (!this.userId) {
+      return;
+    }
+
+    const clientErrors = this.buildClientValidationErrors();
+    if (Object.keys(clientErrors).length > 0) {
+      this.fieldErrors = clientErrors;
+      this.showMessage('Fix validation errors before reviewing the current form.', 'error');
+      return;
+    }
+
+    this.aiLoading = true;
+    this.duplicatesLoading = true;
+    this.message = '';
+    this.messageType = '';
+
+    const payload: UpdateBusinessUserRequest = {
+      fullName: this.updateRequest.fullName.trim(),
+      phone: this.updateRequest.phone.trim(),
+      address: this.updateRequest.address.trim(),
+      region: this.updateRequest.region.trim(),
+      organizationName: this.updateRequest.organizationName.trim(),
+      activityDescription: this.updateRequest.activityDescription.trim(),
+      userType: this.updateRequest.userType
+    };
+
+    this.userService.previewAiReview(this.userId, payload).subscribe({
+      next: (preview) => {
+        this.aiReview = preview.review;
+        this.duplicateScan = preview.duplicateScan;
+        this.aiLoading = false;
+        this.duplicatesLoading = false;
+      },
+      error: (err) => {
+        this.aiLoading = false;
+        this.duplicatesLoading = false;
+        this.showMessage(this.extractErrorMessage(err, 'Error reviewing the current form.'), 'error');
+      }
+    });
   }
 }

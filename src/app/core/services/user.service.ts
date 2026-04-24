@@ -7,6 +7,7 @@ import {
   CreateBusinessUserRequest,
   UpdateBusinessUserRequest
 } from '../models/admin-user-request.model';
+import { AdminAiPreviewResult, DuplicateScanResult, UserAiReview } from '../models/user-ai.model';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
@@ -37,5 +38,21 @@ export class UserService {
 
   unlock(id: number): Observable<UserProfile> {
     return this.http.post<UserProfile>(`${this.url}/${id}/unlock`, {});
+  }
+
+  getAiReview(id: number): Observable<UserAiReview> {
+    return this.http.get<UserAiReview>(`${this.url}/${id}/ai-review`);
+  }
+
+  runAiReview(id: number): Observable<UserAiReview> {
+    return this.http.post<UserAiReview>(`${this.url}/${id}/ai-review`, {});
+  }
+
+  previewAiReview(id: number, user: UpdateBusinessUserRequest): Observable<AdminAiPreviewResult> {
+    return this.http.post<AdminAiPreviewResult>(`${this.url}/${id}/ai-review/preview`, user);
+  }
+
+  getDuplicateCandidates(id: number): Observable<DuplicateScanResult> {
+    return this.http.get<DuplicateScanResult>(`${this.url}/${id}/duplicate-candidates`);
   }
 }
