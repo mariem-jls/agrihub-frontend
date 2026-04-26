@@ -1,9 +1,12 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { AuthGuard } from './core/guards/auth.guard';
+import { AdminGuard } from './core/guards/admin.guard';
 
 const routes: Routes = [
   {
     path: 'seller',
+    canActivate: [AuthGuard, AdminGuard],
     loadChildren: () =>
       import('./seller/seller.module')
         .then(m => m.SellerModule)
@@ -22,7 +25,7 @@ const routes: Routes = [
 
   {
     path: '',
-    redirectTo: 'marketplace',
+    redirectTo: 'seller',
     pathMatch: 'full'
   }
 ];

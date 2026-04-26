@@ -8,10 +8,13 @@ import { HttpClientModule } from '@angular/common/http';
 
 import { SellerRoutingModule } from './seller-routing.module';
 import { SellerLayoutComponent } from './layout/seller-layout.component';
+
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { ProductListComponent } from './components/product-list/product-list.component';
 import { ProductFormComponent } from './components/product-form/product-form.component';
 import { OrderListComponent } from './components/order-list/order-list.component';
+import { UserListComponent } from './components/user-list/user-list.component';
+import { UserFormComponent } from './components/user-form/user-form.component';
 import { ProductImageUploadComponent } from './components/product-image-upload/product-image-upload.component';
 import { DemandesComponent } from './components/demandes/demandes.component';
 import { RessourcesComponent } from './components/ressources/ressources.component';
@@ -30,6 +33,9 @@ import { ReclamationsComponent } from './components/reclamations/reclamations.co
     ProductFormComponent,
     OrderListComponent,
     ProductImageUploadComponent,
+    OrderListComponent,
+    UserListComponent,
+    UserFormComponent,
     FundingProjectComponent,
     ContributionsComponent,
     WalletsComponent,
@@ -38,7 +44,7 @@ import { ReclamationsComponent } from './components/reclamations/reclamations.co
 
     ProductImageUploadComponent,
     DemandesComponent,
-    RessourcesComponent
+    RessourcesComponent,
     ProductImageUploadComponent
   ],
   imports: [

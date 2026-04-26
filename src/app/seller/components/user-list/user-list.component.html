@@ -1,0 +1,144 @@
+<div class="dashboard-layout">
+
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <h2>AgriHub</h2>
+      <span>Seller Dashboard</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a routerLink="/seller" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        Dashboard
+      </a>
+      <a routerLink="/seller/users" routerLinkActive="active">
+        Users
+      </a>
+      <a routerLink="/seller/products" routerLinkActive="active">
+        My Products
+      </a>
+      <a routerLink="/seller/orders" routerLinkActive="active">
+        My Orders
+      </a>
+    </nav>
+
+    <div class="sidebar-user">
+      <button class="logout-btn" (click)="logout()">
+        Logout
+      </button>
+    </div>
+  </div>
+
+  <div class="seller-content">
+    <div class="page-header">
+      <div>
+        <h1>Users</h1>
+        <p>Manage platform users</p>
+      </div>
+      <div class="page-header__actions">
+        <select [(ngModel)]="aiFilter" class="filter-select">
+          <option value="ALL">All users</option>
+          <option value="NEEDS_REVIEW">Needs review</option>
+          <option value="HIGH_RISK">High risk</option>
+          <option value="POSSIBLE_DUPLICATES">Possible duplicates</option>
+        </select>
+        <button class="btn btn-primary" (click)="goToAdd()">
+          + Add New User
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="message" [class]="'alert alert-' + messageType">
+      {{ message }}
+    </div>
+
+    <div *ngIf="loading" class="loading">
+      Loading users...
+    </div>
+
+    <div *ngIf="!loading && filteredUsers.length === 0" class="empty-state">
+      <div class="empty-icon">User</div>
+      <h3>No users found</h3>
+      <p>Start by adding your first user</p>
+      <button class="btn btn-primary" (click)="goToAdd()">
+        + Add User
+      </button>
+    </div>
+
+    <div *ngIf="!loading && filteredUsers.length > 0" class="table-card">
+      <table class="product-table">
+        <thead>
+        <tr>
+          <th>#</th>
+          <th>Username</th>
+          <th>Full Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Address</th>
+          <th>User Type</th>
+          <th>Region</th>
+          <th>Account</th>
+          <th>Onboarding</th>
+          <th>AI Review</th>
+          <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let u of filteredUsers">
+          <td>{{ u.id }}</td>
+          <td><strong>{{ u.username }}</strong></td>
+          <td>{{ u.fullName || '-' }}</td>
+          <td>{{ u.email || '-' }}</td>
+          <td>{{ u.phone || '-' }}</td>
+          <td>{{ u.address || '-' }}</td>
+          <td>
+              <span [class]="'badge ' + getUserTypeClass(u.userType)">
+                {{ u.userType || '-' }}
+              </span>
+          </td>
+          <td>{{ u.region || '-' }}</td>
+          <td>
+              <span [class]="'badge ' + getAccountStatusClass(u)">
+                {{ getAccountStatusLabel(u) }}
+              </span>
+            <div *ngIf="isOrphaned(u)" class="account-hint">
+              Delete and recreate required
+            </div>
+          </td>
+          <td>
+              <span [class]="'badge ' + (u.onboardingCompleted ? 'badge-active' : 'badge-inactive')">
+                {{ u.onboardingCompleted ? 'Completed' : 'Pending' }}
+              </span>
+          </td>
+          <td>
+              <span [class]="'badge ' + getAiBadgeClass(u)">
+                {{ u.aiRecommendation || 'Not reviewed' }}
+              </span>
+            <div class="account-hint" *ngIf="u.aiReadinessScore !== undefined && u.aiReadinessScore !== null">
+              Q {{ u.aiReadinessScore }}/100 | R {{ u.aiRiskScore }}/100
+            </div>
+            <div class="account-hint" *ngIf="(u.duplicateWarningCount ?? 0) > 0">
+              {{ u.duplicateWarningCount }} possible duplicate(s)
+            </div>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn btn-sm btn-edit" (click)="goToEdit(u.id!)">
+                Edit
+              </button>
+              <button *ngIf="u.accountEnabled && !isOrphaned(u)" class="btn btn-sm btn-delete" (click)="lockUser(u)">
+                Lock
+              </button>
+              <button *ngIf="!u.accountEnabled && !isOrphaned(u)" class="btn btn-sm btn-edit" (click)="unlockUser(u)">
+                Unlock
+              </button>
+              <button *ngIf="isOrphaned(u)" class="btn btn-sm btn-muted" type="button" disabled>
+                Keycloak Missing
+              </button>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

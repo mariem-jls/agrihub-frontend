@@ -4,7 +4,10 @@ import { OrderService } from '../../../core/services/order.service';
 import { Product } from '../../../core/models/product.model';
 import { Order } from '../../../core/models/order.model';
 import { RessourceService } from '../../../core/services/ressource.service';
-import { DemandeService, Demande } from '../../../core/services/demande.service';
+import {
+  DemandeService,
+  Demande,
+} from '../../../core/services/demande.service';
 import { Ressource } from '../../../core/models/ressource';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -14,17 +17,20 @@ import { ParticipationService } from '../../../event/services/participation.serv
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css']
+  styleUrls: ['./dashboard.component.css'],
 })
 export class DashboardComponent implements OnInit {
-
-  // ID vendeur en dur pour l'instant
   sellerId = 1;
+
   events: any[] = [];
   participations: any[] = [];
-
   products: Product[] = [];
   orders: Order[] = [];
+  ressources: Ressource[] = [];
+  demandes: Demande[] = [];
+
+  isLoading = true;
+
   totalEvents = 0;
   totalParticipations = 0;
   pendingParticipations = 0;
@@ -35,22 +41,24 @@ export class DashboardComponent implements OnInit {
   totalOrders = 0;
   pendingOrders = 0;
   lowStockProducts = 0;
- ressources: Ressource[] = [];
-  demandes: Demande[] = [];
-  isLoading = true;
 
-  // IA Dashboard
+  // IA
   aiScore: number | null = null;
   aiSegment: string | null = null;
   aiAlerts: string[] = [];
+  aiRecommendations: string[] = [];
+  aiDetails: any = null;
   aiLoading = false;
   aiError: string | null = null;
+
+  private aiLoaded = false;
+  private dataReady = 0;
 
   constructor(
     private productService: ProductService,
     private orderService: OrderService,
-      private ressourceService: RessourceService,
-    private demandeService: DemandeService
+    private ressourceService: RessourceService,
+    private demandeService: DemandeService,
     private eventService: EventService,
     private participationService: ParticipationService,
     private http: HttpClient,
@@ -60,58 +68,26 @@ export class DashboardComponent implements OnInit {
   ngOnInit(): void {
     this.loadProducts();
     this.loadOrders();
-        this.loadRessources();
+    this.loadRessources();
     this.loadDemandes();
-  }
- loadRessources() {
-    this.ressourceService.getAll().subscribe({
-      next: (data) => this.ressources = data,
-      error: (err) => console.error('Erreur chargement ressources', err)
-    });
     this.loadEvents();
     this.loadParticipations();
   }
 
-  // 👇 Charger les demandes
-  loadDemandes() {
-    this.demandeService.getAll().subscribe({
-      next: (data) => this.demandes = data,
-      error: (err) => console.error('Erreur chargement demandes', err)
-  loadEvents(): void {
-    this.eventService.getAllEvents().subscribe({
-      next: (data: any[]) => {
-        this.events = data ?? [];
-        this.totalEvents = this.events.length;
-        this.completEvents = this.events.filter(e => e.statut === 'COMPLET').length;
-        this.isLoading = false;
-        this.tryLoadAI();
-      },
-      error: () => { this.isLoading = false; }
-    });
-  }
-
-  // 👇 Fonction pour récupérer le nom de la ressource pour une demande
-  getRessourceName(ressourceId: number): string {
-    const res = this.ressources.find(r => r.id === ressourceId);
-    return res ? res.nameR : 'Unknown';
-  }
   loadProducts(): void {
     this.productService.getBySeller(this.sellerId).subscribe({
       next: (data) => {
         this.products = data;
         this.totalProducts = data.length;
+
         this.lowStockProducts = data.filter(
-          p => p.stockQuantity !== undefined && p.stockQuantity < 5
-  loadParticipations(): void {
-    this.participationService.getAllParticipations().subscribe({
-      next: (data: any[]) => {
-        this.participations = data ?? [];
-        this.totalParticipations = this.participations.length;
-        this.pendingParticipations = this.participations.filter(
-          p => p.statut === 'EN_ATTENTE'
+          (p) =>
+            p.stockQuantity !== undefined &&
+            p.stockQuantity !== null &&
+            p.stockQuantity < 5
         ).length;
       },
-      error: (err) => console.error('Error loading products', err)
+      error: (err) => console.error('Error loading products', err),
     });
   }
 
@@ -120,71 +96,143 @@ export class DashboardComponent implements OnInit {
       next: (data) => {
         this.orders = data;
         this.totalOrders = data.length;
+
         this.pendingOrders = data.filter(
-          o => o.status === 'PENDING'
-        this.confirmedParticipations = this.participations.filter(
-          p => p.statut === 'CONFIRMEE'
+          (o) => o.status === 'PENDING'
         ).length;
-        this.tryLoadAI();
       },
-      error: (err) => console.error('Error loading orders', err)
-    });
-      error: () => {}
+      error: (err) => console.error('Error loading orders', err),
     });
   }
 
-  private aiLoaded = false;
-  private dataReady = 0;
+  loadRessources(): void {
+    this.ressourceService.getAll().subscribe({
+      next: (data) => {
+        this.ressources = data;
+      },
+      error: (err) =>
+        console.error('Erreur chargement ressources', err),
+    });
+  }
+
+  loadDemandes(): void {
+    this.demandeService.getAll().subscribe({
+      next: (data) => {
+        this.demandes = data;
+      },
+      error: (err) =>
+        console.error('Erreur chargement demandes', err),
+    });
+  }
+
+  loadEvents(): void {
+    this.eventService.getAllEvents().subscribe({
+      next: (data: any[]) => {
+        this.events = data ?? [];
+        this.totalEvents = this.events.length;
+
+        this.completEvents = this.events.filter(
+          (e) => e.statut === 'COMPLET'
+        ).length;
+
+        this.isLoading = false;
+        this.tryLoadAI();
+      },
+      error: (err) => {
+        console.error('Erreur chargement events', err);
+        this.isLoading = false;
+      },
+    });
+  }
+
+  loadParticipations(): void {
+    this.participationService.getAllParticipations().subscribe({
+      next: (data: any[]) => {
+        this.participations = data ?? [];
+        this.totalParticipations = this.participations.length;
+
+        this.pendingParticipations = this.participations.filter(
+          (p) => p.statut === 'EN_ATTENTE'
+        ).length;
+
+        this.confirmedParticipations = this.participations.filter(
+          (p) => p.statut === 'CONFIRMEE'
+        ).length;
+
+        this.tryLoadAI();
+      },
+      error: (err) =>
+        console.error('Erreur chargement participations', err),
+    });
+  }
+
+  getRessourceName(ressourceId: number): string {
+    const res = this.ressources.find((r) => r.id === ressourceId);
+    return res ? res.nameR : 'Unknown';
+  }
 
   tryLoadAI(): void {
     this.dataReady++;
+
     if (this.dataReady >= 2 && !this.aiLoaded) {
       this.aiLoaded = true;
       this.loadAI();
     }
   }
 
-// Ajouter ces propriétés
-aiRecommendations: string[] = [];
-aiDetails: any = null;
+  loadAI(): void {
+    this.aiLoading = true;
+    this.aiError = null;
 
-loadAI(): void {
-  this.aiLoading = true;
-  this.aiError = null;
+    const participationRate =
+      this.totalParticipations > 0
+        ? this.confirmedParticipations / this.totalParticipations
+        : 0;
 
-  const participationRate = this.totalParticipations > 0
-    ? this.confirmedParticipations / this.totalParticipations
-    : 0;
+    const payload = {
+      inscriptions_jour: Math.min(
+        this.totalParticipations * 2,
+        20
+      ),
+      events_recents: Math.min(this.totalEvents * 3, 10),
+      actions_rapides: Math.min(
+        this.confirmedParticipations,
+        10
+      ),
+      email_suspect: 0,
+      login_count: Math.max(
+        this.totalParticipations + this.totalEvents,
+        1
+      ),
+      participation_rate: parseFloat(
+        participationRate.toFixed(2)
+      ),
+      total_participations: this.totalParticipations,
+      confirmed_participations:
+      this.confirmedParticipations,
+      total_events: this.totalEvents,
+      complet_events: this.completEvents,
+    };
 
-  const payload = {
-    inscriptions_jour: Math.min(this.totalParticipations * 2, 20),
-    events_recents: Math.min(this.totalEvents * 3, 10),
-    actions_rapides: Math.min(this.confirmedParticipations, 10),
-    email_suspect: 0,
-    login_count: Math.max(this.totalParticipations + this.totalEvents, 1),
-    participation_rate: parseFloat(participationRate.toFixed(2)),
-    // Nouvelles données
-    total_participations: this.totalParticipations,
-    confirmed_participations: this.confirmedParticipations,
-    total_events: this.totalEvents,
-    complet_events: this.completEvents
-  };
-
-  this.http.post<any>('/AgriHub/api/ai/dashboard', payload).subscribe({
-    next: (res) => {
-      this.aiScore = res.score;
-      this.aiSegment = res.segment;
-      this.aiAlerts = res.alerts ?? [];
-      this.aiRecommendations = res.recommendations ?? [];
-      this.aiDetails = res.details ?? null;
-      this.aiLoading = false;
-    },
-    error: () => {
-      this.aiError = 'Impossible de charger l\'analyse IA.';
-      this.aiLoading = false;
-    }
-  });
-}
+    this.http
+      .post<any>('/AgriHub/api/ai/dashboard', payload)
+      .subscribe({
+        next: (res) => {
+          this.aiScore = res.score;
+          this.aiSegment = res.segment;
+          this.aiAlerts = res.alerts ?? [];
+          this.aiRecommendations =
+            res.recommendations ?? [];
+          this.aiDetails = res.details ?? null;
+          this.aiLoading = false;
+        },
+        error: () => {
+          this.aiError =
+            "Impossible de charger l'analyse IA.";
+          this.aiLoading = false;
+        },
+      });
+  }
 
   get segmentColor(): string {
     if (!this.aiSegment) return '#6b7280';
@@ -209,7 +257,7 @@ loadAI(): void {
 
   get scoreDashoffset(): number {
     if (this.aiScore === null) return 282;
-    return 282 - (282 * this.aiScore / 100);
+    return 282 - (282 * this.aiScore) / 100;
   }
 
   formatDate(d: string): string {
@@ -219,21 +267,31 @@ loadAI(): void {
 
   statutClass(s: string): string {
     switch (s) {
-      case 'CONFIRMEE':     return 'b-confirmed';
-      case 'REFUSEE':       return 'b-cancelled';
-      case 'EN_ATTENTE':    return 'b-pending';
-      case 'LISTE_ATTENTE': return 'b-preparing';
-      default:              return 'b-inactive';
+      case 'CONFIRMEE':
+        return 'b-confirmed';
+      case 'REFUSEE':
+        return 'b-cancelled';
+      case 'EN_ATTENTE':
+        return 'b-pending';
+      case 'LISTE_ATTENTE':
+        return 'b-preparing';
+      default:
+        return 'b-inactive';
     }
   }
 
   statutLabel(s: string): string {
     switch (s) {
-      case 'CONFIRMEE':     return 'Confirmée';
-      case 'REFUSEE':       return 'Refusée';
-      case 'EN_ATTENTE':    return 'En attente';
-      case 'LISTE_ATTENTE': return 'Liste attente';
-      default: return s ?? '—';
+      case 'CONFIRMEE':
+        return 'Confirmée';
+      case 'REFUSEE':
+        return 'Refusée';
+      case 'EN_ATTENTE':
+        return 'En attente';
+      case 'LISTE_ATTENTE':
+        return 'Liste attente';
+      default:
+        return s ?? '—';
     }
   }
 }

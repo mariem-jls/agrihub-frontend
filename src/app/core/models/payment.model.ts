@@ -1,5 +1,5 @@
 export type PaymentMethod =
-  'CASH_ON_DELIVERY' | 'FLOUCI' | 'KONNECT' | 'STRIPE';
+  'CASH_ON_DELIVERY' | 'FLOUCI' | 'KONNECT';
 
 export type PaymentStatus =
   'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED';

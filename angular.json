@@ -52,8 +52,8 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "2kB",
-                  "maximumError": "4kB"
+                  "maximumWarning": "4kB",
+                  "maximumError": "6kB"
                 }
               ],
               "outputHashing": "all"
@@ -67,18 +67,21 @@
           "defaultConfiguration": "production"
         },
         "serve": {
-  "builder": "@angular-devkit/build-angular:dev-server",
-  "configurations": {
-    "production": {
-      "buildTarget": "agrihub-frontend:build:production"
-    },
-    "development": {
-      "buildTarget": "agrihub-frontend:build:development",
-      "proxyConfig": "proxy.conf.json"
-    }
-  },
-  "defaultConfiguration": "development"
-},
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "port": 4300,
+            "open": true
+          },
+          "configurations": {
+            "production": {
+              "buildTarget": "agrihub-frontend:build:production"
+            },
+            "development": {
+              "buildTarget": "agrihub-frontend:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n"
         },

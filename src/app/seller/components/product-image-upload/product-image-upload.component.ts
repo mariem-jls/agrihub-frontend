@@ -86,7 +86,7 @@ export class ProductImageUploadComponent implements OnInit {
       if (res.status === 'success') {
         this.showMessage('Image uploaded successfully ✅', 'success');
         this.loadImages();
-        
+
         // Si c'est la première image, proposer de la mettre en primary
         if (this.images.length === 0) {
           setTimeout(() => {

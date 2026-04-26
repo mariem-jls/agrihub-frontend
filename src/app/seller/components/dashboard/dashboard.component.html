@@ -11,6 +11,9 @@
          [routerLinkActiveOptions]="{exact: true}">
         📊 Dashboard
       </a>
+      <a routerLink="/seller/users" routerLinkActive="active">
+        👤 Users
+      </a>
       <a routerLink="/seller/products" routerLinkActive="active">
         🛒 My Products
       </a>
@@ -40,12 +43,11 @@
   <div class="page-header">
     <div>
       <h1>Dashboard</h1>
-      <p>Welcome back, Mariem</p>
     </div>
   </div>
 
-  <!-- STATS -->
-  <div class="stats-grid">
+    <!-- STATS -->
+    <div class="stats-grid">
 
     <div class="stat-card green">
       <div class="stat-top">
@@ -155,6 +157,9 @@
           </tr>
         </tbody>
       </table>
+      <a routerLink="/seller/products" class="btn-link">
+        View all products →
+      </a>
     </div>
 
     <!-- RECENT ORDERS -->

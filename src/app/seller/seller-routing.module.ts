@@ -12,11 +12,13 @@ import { ContributionsComponent } from './components/contributions/contributions
 import { WalletsComponent } from './components/wallets/wallets.component';
 import { TransactionsComponent } from './components/transactions/transactions.component';
 import { ReclamationsComponent } from './components/reclamations/reclamations.component';
+import { UserListComponent } from './components/user-list/user-list.component';
+import { UserFormComponent } from './components/user-form/user-form.component';
 
 const routes: Routes = [
-  { path: '', component: DashboardComponent },
+  { path: '',         component: DashboardComponent },
   { path: 'products', component: ProductListComponent },
-  { path: 'products/add', component: ProductFormComponent },
+  { path: 'products/add',      component: ProductFormComponent },
   { path: 'products/edit/:id', component: ProductFormComponent },
   { path: 'orders',   component: OrderListComponent },
   { path: 'ressources', component: RessourcesComponent },
@@ -27,10 +29,13 @@ const routes: Routes = [
   { path: 'wallets', component: WalletsComponent },
   { path: 'transactions', component: TransactionsComponent },
   { path: 'reclamations', component: ReclamationsComponent },
+  { path: 'users', component: UserListComponent },
+  { path: 'users/add', component: UserFormComponent },
+  { path: 'users/edit/:id', component: UserFormComponent }
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule],
+  exports: [RouterModule]
 })
-export class SellerRoutingModule {}
+export class SellerRoutingModule { }

@@ -129,7 +129,7 @@ export class ProductFormComponent implements OnInit {
 
   save(): void {
     this.submitted = true;
-    
+
     if (!this.isFormValid()) {
       this.showMessage('Please fix the errors below ⚠️', 'error');
       return;
